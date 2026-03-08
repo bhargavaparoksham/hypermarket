@@ -76,10 +76,10 @@ Exit criteria:
 
 ### 2.1 Bootstrap Foundry project
 
-- [ ] Add Foundry config files in `packages/contracts`
-- [ ] Add dependency setup for OpenZeppelin or equivalent minimal libraries
-- [ ] Add deployment script skeleton
-- [ ] Add test folder structure
+- [x] Add Foundry config files in `packages/contracts`
+- [x] Add dependency setup for OpenZeppelin or equivalent minimal libraries
+- [x] Add deployment script skeleton
+- [x] Add test folder structure
 
 Exit criteria:
 
@@ -87,9 +87,9 @@ Exit criteria:
 
 ### 2.2 Implement mock USDC
 
-- [ ] Add `MockUSDC.sol`
-- [ ] Mint test balances for local and testnet flows
-- [ ] Add tests for minting and transfer assumptions used by vault tests
+- [x] Add `MockUSDC.sol`
+- [x] Mint test balances for local and testnet flows
+- [x] Add tests for minting and transfer assumptions used by vault tests
 
 Exit criteria:
 
@@ -97,13 +97,13 @@ Exit criteria:
 
 ### 2.3 Implement `HyperVault.sol`
 
-- [ ] Add constructor with USDC address and admin setup
-- [ ] Implement `deposit(uint256 amount)`
-- [ ] Implement `withdraw(uint256 amount)`
-- [ ] Implement restricted `settle(address user, int256 pnl)`
-- [ ] Implement manager update flow
-- [ ] Add pause or emergency controls if kept in MVP scope
-- [ ] Emit events for deposit, withdraw, settlement, and manager changes
+- [x] Add constructor with USDC address and admin setup
+- [x] Implement `deposit(uint256 amount)`
+- [x] Implement `withdraw(uint256 amount)`
+- [x] Implement restricted `settle(address user, int256 pnl)`
+- [x] Implement manager update flow
+- [x] Add pause or emergency controls if kept in MVP scope
+- [x] Emit events for deposit, withdraw, settlement, and manager changes
 
 Exit criteria:
 
@@ -113,12 +113,12 @@ Exit criteria:
 
 ### 2.4 Contract test coverage
 
-- [ ] Add unit tests for deposits
-- [ ] Add unit tests for withdrawals
-- [ ] Add unit tests for settlement credit
-- [ ] Add unit tests for settlement debit
-- [ ] Add unit tests for access control
-- [ ] Add unit tests for edge cases like overdraft and zero amounts
+- [x] Add unit tests for deposits
+- [x] Add unit tests for withdrawals
+- [x] Add unit tests for settlement credit
+- [x] Add unit tests for settlement debit
+- [x] Add unit tests for access control
+- [x] Add unit tests for edge cases like overdraft and zero amounts
 
 Exit criteria:
 
@@ -126,10 +126,10 @@ Exit criteria:
 
 ### 2.5 Testnet deployment path
 
-- [ ] Add deploy config for chosen Polygon-compatible testnet
-- [ ] Add deploy script for `MockUSDC`
-- [ ] Add deploy script for `HyperVault`
-- [ ] Add verification instructions or script placeholders
+- [x] Add deploy config for chosen Polygon-compatible testnet
+- [x] Add deploy script for `MockUSDC`
+- [x] Add deploy script for `HyperVault`
+- [x] Add verification instructions or script placeholders
 - [ ] Record deployed addresses for shared package consumption
 
 Exit criteria:
@@ -430,4 +430,4 @@ Hypermarket MVP is done when all of the following are true:
 
 ## Current Recommended Next Task
 
-Start with `0.1 Initialize monorepo`.
+Start with `2.5 Testnet deployment path`.

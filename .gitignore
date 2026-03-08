@@ -12,6 +12,8 @@ dist
 build
 .next
 coverage
+packages/contracts/cache
+packages/contracts/out
 
 # logs
 *.log
