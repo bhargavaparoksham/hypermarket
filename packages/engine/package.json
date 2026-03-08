@@ -22,7 +22,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "^6.4.1"
+    "@prisma/client": "^6.4.1",
+    "bullmq": "^5.58.5",
+    "ioredis": "5.9.3"
   },
   "devDependencies": {
     "prisma": "^6.4.1"

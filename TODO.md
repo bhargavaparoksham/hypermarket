@@ -168,10 +168,10 @@ Exit criteria:
 
 ### 3.3 Add Redis and BullMQ infrastructure
 
-- [ ] Add Redis client wrapper
-- [ ] Add queue definitions for liquidation and settlement jobs
-- [ ] Add worker bootstrapping
-- [ ] Add retry and idempotency strategy notes in code
+- [x] Add Redis client wrapper
+- [x] Add queue definitions for liquidation and settlement jobs
+- [x] Add worker bootstrapping
+- [x] Add retry and idempotency strategy notes in code
 
 Exit criteria:
 
@@ -430,4 +430,4 @@ Hypermarket MVP is done when all of the following are true:
 
 ## Current Recommended Next Task
 
-Start with `3.3 Add Redis and BullMQ infrastructure`.
+Start with `4.1 Integrate market discovery`.
