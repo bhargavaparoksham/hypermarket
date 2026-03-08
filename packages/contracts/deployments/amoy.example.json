@@ -1,0 +1,12 @@
+{
+  "chainId": 80002,
+  "network": "polygon-amoy",
+  "contracts": {
+    "mockUsdc": "0x1d0dfea85F75792D31eBf60269364eC174Cf64FB",
+    "hyperVault": "0x083eC21aE12676f7C6B78124bc718F221959f159"
+  },
+  "roles": {
+    "owner": "0x12382265216be16bF99A3CA0249aF56A18287DD2",
+    "manager": "0x12382265216be16bF99A3CA0249aF56A18287DD2"
+  }
+}

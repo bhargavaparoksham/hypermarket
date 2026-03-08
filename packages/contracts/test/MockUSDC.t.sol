@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.24;
 
-import {MockUSDC} from "../src/MockUSDC.sol";
+import {MockUSDC} from "../src/mocks/MockUSDC.sol";
 import {TestHelpers} from "./utils/TestHelpers.sol";
 import {Vm} from "./utils/Vm.sol";
 

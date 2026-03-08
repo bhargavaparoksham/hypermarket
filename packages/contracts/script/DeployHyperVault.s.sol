@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.24;
 
-import {Script} from "../src/foundry/Script.sol";
+import {Script} from "./utils/Script.sol";
 import {HyperVault} from "../src/HyperVault.sol";
 
 contract DeployHyperVault is Script {

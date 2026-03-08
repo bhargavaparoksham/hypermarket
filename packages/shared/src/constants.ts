@@ -19,10 +19,3 @@ export const RISK_PARAMETERS = {
   maxAccountNotional: 25_000,
   stalePriceThresholdMs: 15_000
 } as const;
-
-export const CONTRACT_ADDRESSES = {
-  [SUPPORTED_CHAIN_IDS.polygonAmoy]: {
-    hyperVault: "0x0000000000000000000000000000000000000000",
-    collateralToken: "0x0000000000000000000000000000000000000000"
-  }
-} as const;

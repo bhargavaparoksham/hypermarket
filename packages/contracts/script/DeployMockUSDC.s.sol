@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.24;
 
-import {Script} from "../src/foundry/Script.sol";
-import {MockUSDC} from "../src/MockUSDC.sol";
+import {Script} from "./utils/Script.sol";
+import {MockUSDC} from "../src/mocks/MockUSDC.sol";
 
 contract DeployMockUSDC is Script {
     function run() external returns (MockUSDC token) {

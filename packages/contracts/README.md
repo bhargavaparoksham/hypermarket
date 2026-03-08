@@ -4,8 +4,16 @@ Foundry package for Hypermarket settlement contracts.
 
 ## Contracts
 
-- `MockUSDC.sol`: 6-decimal mock collateral token for local and testnet MVP flows
-- `HyperVault.sol`: on-chain custody and settlement contract for deposits, withdrawals, and manager-driven realized PnL settlement
+- `src/HyperVault.sol`: on-chain custody and settlement contract for deposits, withdrawals, and manager-driven realized PnL settlement
+- `src/mocks/MockUSDC.sol`: 6-decimal mock collateral token for local and testnet MVP flows, built on OpenZeppelin ERC20
+
+## Layout
+
+- `src/`: deployable product contracts
+- `src/mocks/`: local and testnet support contracts
+- `script/`: Foundry deployment scripts
+- `script/utils/`: script-only helpers
+- `test/`: contract tests
 
 ## Local Commands
 
@@ -43,6 +51,11 @@ MANAGER_ADDRESS=
    - owner address
    - manager address
 4. Copy deployed addresses into the shared package config before wiring engine and web
+
+Deployment records should be stored in:
+
+- `packages/contracts/deployments/amoy.example.json` as the shape reference
+- `packages/shared/src/addresses.ts` for app consumption
 
 ## Example Commands
 

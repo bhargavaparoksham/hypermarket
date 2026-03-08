@@ -1,4 +1,5 @@
-import { DEFAULT_CHAIN_ID, CONTRACT_ADDRESSES } from "./constants.js";
+import { CONTRACT_ADDRESSES } from "./addresses.js";
+import { DEFAULT_CHAIN_ID } from "./constants.js";
 import { hyperVaultAbi } from "./abi/hyperVault.js";
 
 export const contracts = {

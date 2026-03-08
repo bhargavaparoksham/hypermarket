@@ -130,7 +130,7 @@ Exit criteria:
 - [x] Add deploy script for `MockUSDC`
 - [x] Add deploy script for `HyperVault`
 - [x] Add verification instructions or script placeholders
-- [ ] Record deployed addresses for shared package consumption
+- [x] Record deployed addresses for shared package consumption
 
 Exit criteria:
 
@@ -430,4 +430,4 @@ Hypermarket MVP is done when all of the following are true:
 
 ## Current Recommended Next Task
 
-Start with `2.5 Testnet deployment path`.
+Start with `3.1 Bootstrap engine package` unless you want to broadcast contracts to Amoy now.
