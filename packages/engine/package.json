@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "test:db": "node --test --experimental-strip-types test/db.integration.test.ts",
     "test": "echo 'engine tests not configured yet'",
     "dev": "node --watch --experimental-strip-types src/index.ts",
     "dev:api": "node --watch --experimental-strip-types src/api.ts",
