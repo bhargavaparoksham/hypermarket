@@ -69,6 +69,13 @@ Recommended workspace tooling:
 - Redis for ephemeral market state and queues
 - BullMQ for scheduled and retryable jobs
 
+Initial package responsibilities:
+
+- `packages/contracts`: vault contract, mocks, tests, and deployment scripts
+- `packages/engine`: API server, market ingestion, risk engine, liquidation workers, settlement bridge
+- `packages/web`: trading terminal, wallet flows, account views, and real-time UI
+- `packages/shared`: shared types, constants, ABI exports, and config used by all packages
+
 ## System Overview
 
 ```text

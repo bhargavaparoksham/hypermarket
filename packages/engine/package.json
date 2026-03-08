@@ -1,0 +1,13 @@
+{
+  "name": "@hypermarket/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "test": "echo 'engine tests not configured yet'",
+    "dev": "echo 'engine dev server not bootstrapped yet'",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

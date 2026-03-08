@@ -1,0 +1,12 @@
+{
+  "name": "@hypermarket/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "echo 'web tests not configured yet'",
+    "dev": "echo 'web app not bootstrapped yet'",
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

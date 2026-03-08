@@ -1,0 +1,7 @@
+node_modules
+dist
+build
+.next
+coverage
+packages/contracts/lib
+packages/contracts/out

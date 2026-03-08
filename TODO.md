@@ -20,14 +20,14 @@ Rules for using this file:
 
 ### 0.1 Initialize monorepo
 
-- [ ] Create root `package.json` with `pnpm` workspaces
-- [ ] Add top-level package scripts for build, lint, test, and dev
-- [ ] Create `packages/contracts`
-- [ ] Create `packages/engine`
-- [ ] Create `packages/web`
-- [ ] Create `packages/shared`
-- [ ] Add root `.gitignore`
-- [ ] Add base `README.md` references to package responsibilities
+- [x] Create root `package.json` with `pnpm` workspaces
+- [x] Add top-level package scripts for build, lint, test, and dev
+- [x] Create `packages/contracts`
+- [x] Create `packages/engine`
+- [x] Create `packages/web`
+- [x] Create `packages/shared`
+- [x] Add root `.gitignore`
+- [x] Add base `README.md` references to package responsibilities
 
 Exit criteria:
 
@@ -37,11 +37,11 @@ Exit criteria:
 
 ### 0.2 Add common TypeScript and formatting setup
 
-- [ ] Add root `tsconfig` base config
-- [ ] Add package-level `tsconfig` files where needed
-- [ ] Add ESLint config
-- [ ] Add Prettier config
-- [ ] Add environment variable example files
+- [x] Add root `tsconfig` base config
+- [x] Add package-level `tsconfig` files where needed
+- [x] Add ESLint config
+- [x] Add Prettier config
+- [x] Add environment variable example files
 
 Exit criteria:
 
@@ -52,11 +52,11 @@ Exit criteria:
 
 ### 1.1 Create `packages/shared` package
 
-- [ ] Add package manifest
-- [ ] Add exports for constants, enums, and shared types
-- [ ] Define market, position, account, settlement, and liquidation types
-- [ ] Define chain IDs and contract address placeholders
-- [ ] Define leverage and risk parameter constants
+- [x] Add package manifest
+- [x] Add exports for constants, enums, and shared types
+- [x] Define market, position, account, settlement, and liquidation types
+- [x] Define chain IDs and contract address placeholders
+- [x] Define leverage and risk parameter constants
 
 Exit criteria:
 
@@ -64,9 +64,9 @@ Exit criteria:
 
 ### 1.2 Add contract ABI publishing flow
 
-- [ ] Add generated or placeholder ABI export structure
-- [ ] Add shared vault interface types
-- [ ] Document how contract artifacts are synced into shared
+- [x] Add generated or placeholder ABI export structure
+- [x] Add shared vault interface types
+- [x] Document how contract artifacts are synced into shared
 
 Exit criteria:
 
