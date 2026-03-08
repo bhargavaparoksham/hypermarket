@@ -14,6 +14,8 @@ export interface EngineConfig {
   polygonRpcUrl: string;
   vaultManagerPrivateKey: string;
   hyperVaultAddress: string;
+  settlementReconcileIntervalMs: number;
+  vaultSyncIntervalMs: number;
 }
 
 export interface LogContext {

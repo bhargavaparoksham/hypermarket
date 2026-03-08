@@ -5,6 +5,12 @@ import {
 } from "./account-service.js";
 import { DECIMAL_ONE, DECIMAL_ZERO, toDecimal } from "./decimal.js";
 import {
+  queueSettlementRequest,
+  type CreateSettlementInput,
+  type SettlementPrismaLike,
+  type SettlementQueueLike
+} from "./settlement-service.js";
+import {
   calculateLiquidationPrice,
   calculateInitialMargin,
   calculateMaintenanceMargin,
@@ -94,6 +100,12 @@ export interface PositionService {
   closePosition(input: ClosePositionInput): Promise<{ positionId: string }>;
 }
 
+type QueueSettlementFn = (
+  prisma: SettlementPrismaLike,
+  settlementQueue: SettlementQueueLike,
+  input: CreateSettlementInput
+) => Promise<{ settlementId: string; deduplicated: boolean }>;
+
 function calculateRealizedPnl(
   side: PositionSide,
   entryPrice: Decimal,
@@ -106,7 +118,13 @@ function calculateRealizedPnl(
   return priceDelta.mul(size);
 }
 
-export function createPositionService(prisma: PositionPrismaLike): PositionService {
+export function createPositionService(
+  prisma: PositionPrismaLike,
+  options?: {
+    settlementQueue?: SettlementQueueLike;
+    queueSettlement?: QueueSettlementFn;
+  }
+): PositionService {
   return {
     async openPosition(input) {
       return prisma.$transaction(async (tx: TransactionLike) => {
@@ -292,6 +310,18 @@ export function createPositionService(prisma: PositionPrismaLike): PositionServi
         await accountService.syncMarginAccount({
           userId: position.userId
         });
+
+        if (options?.settlementQueue) {
+          await (options.queueSettlement ?? queueSettlementRequest)(
+            tx as unknown as SettlementPrismaLike,
+            options.settlementQueue,
+            {
+              userId: position.userId,
+              positionId: position.id,
+              pnl: realizedPnlDelta
+            }
+          );
+        }
 
         return { positionId: position.id };
       });

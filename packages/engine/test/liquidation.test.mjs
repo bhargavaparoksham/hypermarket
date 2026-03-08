@@ -15,13 +15,25 @@ class FakeLiquidationPrisma {
     this.positions = new Map();
     this.liquidations = new Map();
     this.accounts = new Map();
+    this.settlements = new Map();
     this.ids = 0;
 
     this.user = {
       upsert: async ({ where, create }) => ({
         id: `user-${where.walletAddress}`,
         walletAddress: create.walletAddress
-      })
+      }),
+      findUnique: async ({ where }) => {
+        if (where.id) {
+          return {
+            id: where.id,
+            walletAddress: `0x${where.id.slice(-1).repeat(40)}`
+          };
+        }
+
+        return null;
+      },
+      findMany: async () => []
     };
 
     this.marginAccount = {
@@ -80,6 +92,42 @@ class FakeLiquidationPrisma {
         const liquidation = this.liquidations.get(where.id);
         Object.assign(liquidation, data);
         return liquidation;
+      }
+    };
+
+    this.settlement = {
+      findUnique: async ({ where }) => this.settlements.get(where.id) ?? null,
+      findFirst: async ({ where }) =>
+        [...this.settlements.values()].find((settlement) => {
+          if (where.positionId && settlement.positionId !== where.positionId) {
+            return false;
+          }
+
+          if (where.status?.in && !where.status.in.includes(settlement.status)) {
+            return false;
+          }
+
+          return true;
+        }) ?? null,
+      findMany: async ({ where }) =>
+        [...this.settlements.values()].filter((settlement) =>
+          where.status.in.includes(settlement.status)
+        ),
+      create: async ({ data }) => {
+        const settlement = {
+          id: this.nextId("settlement"),
+          positionId: data.positionId ?? null,
+          transactionHash: null,
+          errorMessage: null,
+          ...data
+        };
+        this.settlements.set(settlement.id, settlement);
+        return settlement;
+      },
+      update: async ({ where, data }) => {
+        const settlement = this.settlements.get(where.id);
+        Object.assign(settlement, data);
+        return settlement;
       }
     };
   }
@@ -269,4 +317,69 @@ test("finalizes a queued liquidation and liquidates the position", async () => {
   assert.equal(position.size.toString(), "0");
   assert.equal(position.realizedPnl.toString(), "-4.5");
   assert.equal(liquidation.status, "SETTLED");
+});
+
+test("finalizing liquidation enqueues a debit settlement", async () => {
+  const prisma = new FakeLiquidationPrisma();
+  prisma.accounts.set("user-1", {
+    id: "account-1",
+    userId: "user-1",
+    settledBalance: decimal("100"),
+    usedMargin: decimal("5"),
+    freeCollateral: decimal("95"),
+    equity: decimal("100"),
+    marginRatio: decimal("0.05"),
+    totalUnrealizedPnl: decimal("0"),
+    lastSyncedAt: null
+  });
+  prisma.positions.set("position-1", {
+    id: "position-1",
+    userId: "user-1",
+    marketId: "market-1",
+    outcomeTokenId: "token-1",
+    side: "LONG",
+    status: "LIQUIDATING",
+    size: decimal("100"),
+    notional: decimal("50"),
+    leverage: decimal("10"),
+    entryPrice: decimal("0.50"),
+    markPrice: decimal("0.455"),
+    liquidationPrice: decimal("0.455"),
+    initialMargin: decimal("5"),
+    maintenanceMargin: decimal("2.5"),
+    unrealizedPnl: decimal("-4.5"),
+    realizedPnl: decimal("0")
+  });
+  prisma.liquidations.set("liquidation-1", {
+    id: "liquidation-1",
+    userId: "user-1",
+    positionId: "position-1",
+    marketId: "market-1",
+    markPrice: decimal("0.455"),
+    liquidationPrice: decimal("0.455"),
+    penalty: decimal("2.5"),
+    status: "QUEUED"
+  });
+
+  const queuedSettlementJobs = [];
+  const service = createLiquidationService(
+    prisma,
+    {
+      async add() {}
+    },
+    {
+      settlementQueue: {
+        async add(name, data) {
+          queuedSettlementJobs.push({ name, data });
+        }
+      }
+    }
+  );
+
+  await service.finalizeLiquidation("liquidation-1");
+
+  assert.equal(queuedSettlementJobs.length, 1);
+  const [settlement] = prisma.settlements.values();
+  assert.equal(settlement.direction, "DEBIT");
+  assert.equal(settlement.pnl.toString(), "-4.5");
 });

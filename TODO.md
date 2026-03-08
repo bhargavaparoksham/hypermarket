@@ -268,9 +268,9 @@ Exit criteria:
 
 ### 6.1 Mirror vault state into engine account state
 
-- [ ] Add on-chain event ingestion or read path for deposits and withdrawals
-- [ ] Sync settled balances into engine accounts
-- [ ] Handle pending settlement states cleanly
+- [x] Add on-chain event ingestion or read path for deposits and withdrawals
+- [x] Sync settled balances into engine accounts
+- [x] Handle pending settlement states cleanly
 
 Exit criteria:
 
@@ -278,11 +278,11 @@ Exit criteria:
 
 ### 6.2 Implement settlement service
 
-- [ ] Add on-chain transaction client with `viem`
-- [ ] Submit `settle(address user, int256 pnl)` from manager wallet
-- [ ] Persist transaction state and retries
-- [ ] Prevent duplicate settlement application
-- [ ] Reconcile on-chain events back into database state
+- [x] Add on-chain transaction client with `viem`
+- [x] Submit `settle(address user, int256 pnl)` from manager wallet
+- [x] Persist transaction state and retries
+- [x] Prevent duplicate settlement application
+- [x] Reconcile on-chain events back into database state
 
 Exit criteria:
 

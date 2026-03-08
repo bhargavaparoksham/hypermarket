@@ -97,6 +97,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): EngineConfig {
     hyperVaultAddress: parseAddress(
       "HYPERVAULT_ADDRESS",
       env.HYPERVAULT_ADDRESS || getRequiredEnv(env, "HYPERVAULT_ADDRESS")
+    ),
+    settlementReconcileIntervalMs: parsePositiveInteger(
+      "SETTLEMENT_RECONCILE_INTERVAL_MS",
+      env.SETTLEMENT_RECONCILE_INTERVAL_MS || "5000"
+    ),
+    vaultSyncIntervalMs: parsePositiveInteger(
+      "VAULT_SYNC_INTERVAL_MS",
+      env.VAULT_SYNC_INTERVAL_MS || "15000"
     )
   };
 }

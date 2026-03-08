@@ -13,6 +13,8 @@ Current scope:
 - allowlisted Polymarket price ingestion into Redis via the worker
 - market price reads via `GET /markets/:marketId/prices`
 - account and position domain services for open/increase/reduce/close flows
+- vault-balance sync service that mirrors on-chain settled collateral into margin accounts
+- settlement lifecycle service with on-chain submission/reconciliation via `viem`
 
 ## Market Discovery
 
@@ -102,6 +104,52 @@ The engine now includes a liquidation service in
 
 The reference `10x` long at `0.50` now produces a liquidation price of
 approximately `0.455`, and that case is covered in tests.
+
+## Vault Balance Sync
+
+The engine now includes a service-layer vault sync path in
+`src/services/vault-sync-service.ts` for Phase `6.1`.
+
+Current behavior:
+
+- reads canonical `HyperVault.settledBalance(user)` via an injected balance reader
+- ensures the engine `User` and `MarginAccount` exist for that wallet
+- mirrors the on-chain settled balance into `MarginAccount.settledBalance`
+- immediately recomputes equity and free collateral from active positions
+- reports net pending settlement delta from `PENDING` and `SUBMITTED`
+  settlement records without applying that delta to `settledBalance`
+
+Pending settlement policy for now:
+
+- on-chain vault balance is the source of truth for mirrored `settledBalance`
+- `PENDING` and `SUBMITTED` settlements are tracked as informational in-flight
+  deltas only
+- `CONFIRMED` settlements should be reflected by the next on-chain mirror pass
+
+This avoids double-counting now that settlement submission and reconciliation
+run as a separate lifecycle on top of the mirrored on-chain balance.
+
+## Settlement Bridge
+
+The engine now includes a settlement lifecycle in
+`src/services/settlement-service.ts` plus a `viem` HyperVault client in
+`src/services/hypervault-client.ts`.
+
+Current behavior:
+
+- close and liquidation flows can create `PENDING` settlement records and enqueue jobs
+- the settlement worker submits `HyperVault.settle(user, pnl)` from the manager wallet
+- submitted settlements are reconciled against on-chain receipts and the emitted
+  `Settled` event
+- confirmed settlements trigger a fresh vault-balance mirror back into the
+  engine margin account
+- the worker also polls known wallets periodically to mirror deposit and
+  withdrawal changes
+
+New worker polling configuration:
+
+- `SETTLEMENT_RECONCILE_INTERVAL_MS` defaults to `5000`
+- `VAULT_SYNC_INTERVAL_MS` defaults to `15000`
 
 ## Database Workflow
 

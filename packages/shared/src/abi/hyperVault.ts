@@ -29,5 +29,16 @@ export const hyperVaultAbi = [
     stateMutability: "view",
     inputs: [{ name: "user", type: "address" }],
     outputs: [{ name: "", type: "uint256" }]
+  },
+  {
+    type: "event",
+    name: "Settled",
+    inputs: [
+      { indexed: true, name: "user", type: "address" },
+      { indexed: false, name: "pnl", type: "int256" },
+      { indexed: false, name: "currentBalance", type: "uint256" },
+      { indexed: false, name: "finalBalance", type: "uint256" }
+    ],
+    anonymous: false
   }
 ] as const;

@@ -4,6 +4,12 @@ import { AccountPrismaLike, createAccountService } from "./account-service.js";
 import { toDecimal } from "./decimal.js";
 import { PositionSide } from "./position-service.js";
 import { calculateLiquidationPrice } from "./risk-formulas.js";
+import {
+  queueSettlementRequest,
+  type CreateSettlementInput,
+  type SettlementPrismaLike,
+  type SettlementQueueLike
+} from "./settlement-service.js";
 
 type PositionStatus = "OPEN" | "CLOSING" | "CLOSED" | "LIQUIDATING" | "LIQUIDATED";
 type LiquidationStatus = "QUEUED" | "IN_PROGRESS" | "SETTLED" | "FAILED";
@@ -113,6 +119,12 @@ export interface LiquidationService {
   finalizeLiquidation(liquidationId: string): Promise<void>;
 }
 
+type QueueSettlementFn = (
+  prisma: SettlementPrismaLike,
+  settlementQueue: SettlementQueueLike,
+  input: CreateSettlementInput
+) => Promise<{ settlementId: string; deduplicated: boolean }>;
+
 const ACTIVE_SCAN_STATUSES = ["OPEN"] as const;
 const PENDING_LIQUIDATION_STATUSES = ["QUEUED", "IN_PROGRESS"] as const;
 
@@ -145,7 +157,11 @@ function buildPriceIndex(
 
 export function createLiquidationService(
   prisma: LiquidationPrismaLike,
-  liquidationQueue: LiquidationQueueLike
+  liquidationQueue: LiquidationQueueLike,
+  options?: {
+    settlementQueue?: SettlementQueueLike;
+    queueSettlement?: QueueSettlementFn;
+  }
 ): LiquidationService {
   return {
     async scanAndQueueLiquidations(priceSnapshots) {
@@ -309,6 +325,18 @@ export function createLiquidationService(
         await accountService.syncMarginAccount({
           userId: position.userId
         });
+
+        if (options?.settlementQueue) {
+          await (options.queueSettlement ?? queueSettlementRequest)(
+            tx as unknown as SettlementPrismaLike,
+            options.settlementQueue,
+            {
+              userId: position.userId,
+              positionId: position.id,
+              pnl: realizedPnlDelta
+            }
+          );
+        }
       });
     }
   };

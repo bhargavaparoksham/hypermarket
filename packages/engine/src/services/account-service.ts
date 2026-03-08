@@ -8,6 +8,9 @@ interface UserDelegate {
     create: { walletAddress: string };
     update: Record<string, never>;
   }): Promise<{ id: string; walletAddress: string }>;
+  findUnique?(args: {
+    where: { walletAddress: string };
+  }): Promise<{ id: string; walletAddress: string } | null>;
 }
 
 interface MarginAccountRecord {
@@ -36,12 +39,13 @@ interface MarginAccountDelegate {
   update(args: {
     where: { userId: string };
     data: {
-      usedMargin: Decimal;
-      freeCollateral: Decimal;
-      equity: Decimal;
-      marginRatio: Decimal;
-      totalUnrealizedPnl: Decimal;
-      lastSyncedAt: Date;
+      settledBalance?: Decimal;
+      usedMargin?: Decimal;
+      freeCollateral?: Decimal;
+      equity?: Decimal;
+      marginRatio?: Decimal;
+      totalUnrealizedPnl?: Decimal;
+      lastSyncedAt?: Date;
     };
   }): Promise<unknown>;
 }
@@ -70,6 +74,11 @@ interface SyncMarginAccountInput {
   userId: string;
 }
 
+interface SyncSettledBalanceInput {
+  userId: string;
+  settledBalance: Decimal | number | string;
+}
+
 const ACTIVE_POSITION_STATUSES = ["OPEN", "CLOSING", "LIQUIDATING"] as const;
 
 export interface AccountService {
@@ -77,6 +86,11 @@ export interface AccountService {
     userId: string;
     marginAccountId: string;
   }>;
+  findUserByWalletAddress(walletAddress: string): Promise<{
+    id: string;
+    walletAddress: string;
+  } | null>;
+  syncSettledBalance(input: SyncSettledBalanceInput): Promise<void>;
   syncMarginAccount(input: SyncMarginAccountInput): Promise<void>;
 }
 
@@ -115,6 +129,39 @@ export function createAccountService(prisma: AccountPrismaLike): AccountService 
         userId: user.id,
         marginAccountId: account.id
       };
+    },
+
+    async findUserByWalletAddress(walletAddress) {
+      if (!prisma.user.findUnique) {
+        throw new Error("User lookup by wallet address is not supported by this prisma client");
+      }
+
+      return prisma.user.findUnique({
+        where: {
+          walletAddress
+        }
+      });
+    },
+
+    async syncSettledBalance(input) {
+      const marginAccount = await prisma.marginAccount.findUnique({
+        where: {
+          userId: input.userId
+        }
+      });
+
+      if (!marginAccount) {
+        throw new Error(`Margin account not found for user ${input.userId}`);
+      }
+
+      await prisma.marginAccount.update({
+        where: {
+          userId: input.userId
+        },
+        data: {
+          settledBalance: new Decimal(input.settledBalance)
+        }
+      });
     },
 
     async syncMarginAccount(input) {

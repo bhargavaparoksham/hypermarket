@@ -19,6 +19,7 @@ class FakeEnginePrisma {
     this.users = new Map();
     this.accounts = new Map();
     this.positions = new Map();
+    this.settlements = new Map();
     this.ids = 0;
 
     this.user = {
@@ -38,7 +39,21 @@ class FakeEnginePrisma {
         };
         this.users.set(user.id, user);
         return user;
-      }
+      },
+      findUnique: async ({ where }) => {
+        if (where.id) {
+          return this.users.get(where.id) ?? null;
+        }
+
+        return (
+          [...this.users.values()].find((user) => user.walletAddress === where.walletAddress) ??
+          null
+        );
+      },
+      findMany: async () =>
+        [...this.users.values()].map((user) => ({
+          walletAddress: user.walletAddress
+        }))
     };
 
     this.marginAccount = {
@@ -129,6 +144,54 @@ class FakeEnginePrisma {
 
         Object.assign(position, data, { updatedAt: new Date() });
         return position;
+      }
+    };
+
+    this.settlement = {
+      findUnique: async ({ where }) => this.settlements.get(where.id) ?? null,
+      findFirst: async ({ where }) =>
+        [...this.settlements.values()].find((settlement) => {
+          if (where.positionId && settlement.positionId !== where.positionId) {
+            return false;
+          }
+
+          if (where.status?.in && !where.status.in.includes(settlement.status)) {
+            return false;
+          }
+
+          return true;
+        }) ?? null,
+      findMany: async ({ where }) =>
+        [...this.settlements.values()].filter((settlement) => {
+          if (where.userId && settlement.userId !== where.userId) {
+            return false;
+          }
+
+          if (where.status?.in && !where.status.in.includes(settlement.status)) {
+            return false;
+          }
+
+          return true;
+        }),
+      create: async ({ data }) => {
+        const settlement = {
+          id: this.nextId("settlement"),
+          positionId: data.positionId ?? null,
+          transactionHash: null,
+          errorMessage: null,
+          ...data
+        };
+        this.settlements.set(settlement.id, settlement);
+        return settlement;
+      },
+      update: async ({ where, data }) => {
+        const settlement = this.settlements.get(where.id);
+        if (!settlement) {
+          throw new Error("settlement not found");
+        }
+
+        Object.assign(settlement, data);
+        return settlement;
       }
     };
   }
@@ -287,4 +350,41 @@ test("position service fully closes a short position", async () => {
   assert.equal(position.size.toString(), "0");
   assert.equal(position.realizedPnl.toString(), "1.6");
   assert.ok(position.closedAt instanceof Date);
+});
+
+test("position service enqueues a settlement when realized pnl changes", async () => {
+  const prisma = new FakeEnginePrisma();
+  const queuedJobs = [];
+  const positionService = createPositionService(prisma, {
+    settlementQueue: {
+      async add(name, data) {
+        queuedJobs.push({ name, data });
+      }
+    }
+  });
+
+  const opened = await positionService.openPosition({
+    walletAddress: "0x5555555555555555555555555555555555555555",
+    marketId: "market-3",
+    outcomeTokenId: "yes-token",
+    side: PositionSide.LONG,
+    size: "10",
+    entryPrice: "0.40",
+    leverage: "3",
+    liquidationPrice: "0.20",
+    initialMargin: "2",
+    maintenanceMargin: "0.5"
+  });
+
+  await positionService.closePosition({
+    positionId: opened.positionId,
+    size: "10",
+    exitPrice: "0.50"
+  });
+
+  assert.equal(queuedJobs.length, 1);
+  const [settlement] = prisma.settlements.values();
+  assert.equal(settlement.status, "PENDING");
+  assert.equal(settlement.pnl.toString(), "1");
+  assert.equal(settlement.direction, "CREDIT");
 });
