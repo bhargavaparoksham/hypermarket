@@ -7,6 +7,6 @@
     "deploy:mockusdc": "forge script script/DeployMockUSDC.s.sol:DeployMockUSDC --rpc-url $POLYGON_AMOY_RPC_URL --private-key $PRIVATE_KEY --broadcast",
     "deploy:vault": "forge script script/DeployHyperVault.s.sol:DeployHyperVault --sig \"run(address,address,address)\" $USDC_ADDRESS $OWNER_ADDRESS $MANAGER_ADDRESS --rpc-url $POLYGON_AMOY_RPC_URL --private-key $PRIVATE_KEY --broadcast",
     "lint": "forge fmt --check",
-    "test": "forge test"
+    "test": "forge test --offline"
   }
 }

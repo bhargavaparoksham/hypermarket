@@ -20,7 +20,7 @@
     "test:prices": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/prices.test.mjs",
     "test:settlement": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/settlement.test.mjs",
     "test:vault-sync": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/vault-sync.test.mjs",
-    "test": "echo 'engine tests not configured yet'",
+    "test": "pnpm run test:markets && pnpm run test:prices && pnpm run test:domain && pnpm run test:formulas && pnpm run test:liquidation && pnpm run test:settlement && pnpm run test:vault-sync",
     "dev": "node --watch --experimental-strip-types src/index.ts",
     "dev:api": "node --watch --experimental-strip-types src/api.ts",
     "dev:worker": "node --watch --experimental-strip-types src/worker.ts",

@@ -7,7 +7,9 @@
     "build": "pnpm -r --if-present build",
     "lint": "pnpm -r --if-present lint",
     "format": "prettier --check .",
-    "test": "pnpm -r --if-present test",
+    "test": "pnpm --filter @hypermarket/contracts test && pnpm --filter @hypermarket/engine test",
+    "test:contracts": "pnpm --filter @hypermarket/contracts test",
+    "test:engine": "pnpm --filter @hypermarket/engine test",
     "dev": "pnpm -r --parallel --if-present dev",
     "typecheck": "pnpm -r --if-present typecheck"
   },
