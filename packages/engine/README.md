@@ -44,6 +44,14 @@ snapshots for that market.
 Staleness is currently derived from the shared
 `RISK_PARAMETERS.stalePriceThresholdMs` value.
 
+Current mark-price policy:
+
+- use midpoint only when the current book is internally consistent and the
+  spread is not excessively wide
+- fall back to fresh last trade when the book is thin or distorted
+- preserve the prior mark if new data is unusable
+- clamp per-update mark jumps to reduce abrupt outliers
+
 ## Database Workflow
 
 The database schema and migration path have been verified against a real PostgreSQL instance running in Docker.

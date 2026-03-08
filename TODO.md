@@ -206,14 +206,16 @@ Exit criteria:
 
 ### 4.3 Define mark-price policy
 
-- [ ] Implement midpoint-based mark price logic
-- [ ] Add fallback rules for thin books or stale data
-- [ ] Clamp abnormal price jumps with explicit guardrails
-- [ ] Add tests for mark-price calculation behavior
+- [x] Implement midpoint-based mark price logic
+- [x] Add fallback rules for thin books or stale data
+- [x] Clamp abnormal price jumps with explicit guardrails
+- [x] Add tests for mark-price calculation behavior
 
 Exit criteria:
 
 - risk calculations rely on one consistent mark-price function
+- verified in a live smoke test against an active market with a distorted book,
+  where raw midpoint was rejected and mark price fell back to last trade
 
 ## Phase 5: Risk Engine and Position Ledger
 
@@ -432,10 +434,10 @@ Hypermarket MVP is done when all of the following are true:
 
 ## Current Recommended Next Task
 
-Start with `4.3 Define mark-price policy`.
+Start with `5.1 Implement account and position domain logic`.
 
 Concrete focus:
 
-- implement midpoint guardrails for thin or distorted books
-- add fallback ordering between midpoint and last trade
-- clamp abnormal jumps with explicit tests against live-observed edge cases
+- add account and position services in `packages/engine`
+- support long, short, partial close, and full close flows
+- persist average entry, realized PnL, and position status transitions in PostgreSQL

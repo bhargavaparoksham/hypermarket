@@ -1,9 +1,7 @@
 import { SupportedMarket } from "@hypermarket/shared";
 import { Logger } from "../logger.js";
-import {
-  MarketPriceStore,
-  WriteMarketPriceSnapshot
-} from "./price-store.js";
+import { MarketPriceStore } from "./price-store.js";
+import { applyMarkPricePolicy } from "./mark-price-policy.js";
 
 interface CreatePolymarketPriceFeedOptions {
   logger: Logger;
@@ -173,34 +171,6 @@ export function parsePolymarketPriceEvents(
   return events;
 }
 
-export function mergePriceSnapshot(
-  existingSnapshot: {
-    bestBid: number | null;
-    bestAsk: number | null;
-    lastTradePrice: number | null;
-  } | null,
-  event: ParsedPolymarketPriceEvent
-): Pick<
-  WriteMarketPriceSnapshot,
-  "bestBid" | "bestAsk" | "midpoint" | "markPrice" | "lastTradePrice"
-> {
-  const bestBid = event.bestBid ?? existingSnapshot?.bestBid ?? null;
-  const bestAsk = event.bestAsk ?? existingSnapshot?.bestAsk ?? null;
-  const lastTradePrice =
-    event.lastTradePrice ?? existingSnapshot?.lastTradePrice ?? null;
-  const midpoint =
-    bestBid !== null && bestAsk !== null ? (bestBid + bestAsk) / 2 : null;
-  const markPrice = midpoint ?? lastTradePrice;
-
-  return {
-    bestBid,
-    bestAsk,
-    midpoint,
-    markPrice,
-    lastTradePrice
-  };
-}
-
 function createSubscriptionMessage(assetIds: string[]): string {
   const payload: SubscriptionMessage = {
     type: "market",
@@ -221,6 +191,7 @@ export function createPolymarketPriceFeed(
       bestBid: number | null;
       bestAsk: number | null;
       lastTradePrice: number | null;
+      markPrice: number | null;
     }
   >();
   let reconnectTimer: NodeJS.Timeout | null = null;
@@ -262,22 +233,23 @@ export function createPolymarketPriceFeed(
             continue;
           }
 
-          const mergedSnapshot = mergePriceSnapshot(
+          const mergedWithPolicy = applyMarkPricePolicy(
             latestByAsset.get(priceEvent.assetId) ?? null,
             priceEvent
           );
 
           latestByAsset.set(priceEvent.assetId, {
-            bestBid: mergedSnapshot.bestBid,
-            bestAsk: mergedSnapshot.bestAsk,
-            lastTradePrice: mergedSnapshot.lastTradePrice
+            bestBid: mergedWithPolicy.bestBid,
+            bestAsk: mergedWithPolicy.bestAsk,
+            lastTradePrice: mergedWithPolicy.lastTradePrice,
+            markPrice: mergedWithPolicy.markPrice
           });
 
           await options.marketPriceStore.setSnapshot({
             marketId: metadata.marketId,
             outcomeTokenId: priceEvent.assetId,
             outcome: metadata.outcome,
-            ...mergedSnapshot
+            ...mergedWithPolicy
           });
         }
       } catch (error) {

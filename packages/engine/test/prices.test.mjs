@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import {
   buildAssetMetadataIndex,
   createPolymarketPriceFeed,
-  mergePriceSnapshot,
   parsePolymarketPriceEvents
 } from "../dist/prices/polymarket-price-feed.js";
+import { applyMarkPricePolicy } from "../dist/prices/mark-price-policy.js";
 import { createRedisMarketPriceStore } from "../dist/prices/price-store.js";
 import { createLogger } from "../dist/logger.js";
 
@@ -195,8 +195,8 @@ test("parsePolymarketPriceEvents handles best_bid_ask and price_change messages"
   ]);
 });
 
-test("mergePriceSnapshot prefers midpoint and falls back to last trade", () => {
-  const midpointSnapshot = mergePriceSnapshot(null, {
+test("mark policy prefers midpoint for tight books", () => {
+  const midpointSnapshot = applyMarkPricePolicy(null, {
     assetId: "token-yes",
     bestBid: 0.48,
     bestAsk: 0.52,
@@ -205,23 +205,64 @@ test("mergePriceSnapshot prefers midpoint and falls back to last trade", () => {
 
   assert.equal(midpointSnapshot.midpoint, 0.5);
   assert.equal(midpointSnapshot.markPrice, 0.5);
+});
 
-  const lastTradeOnlySnapshot = mergePriceSnapshot(
+test("mark policy falls back to last trade for distorted books", () => {
+  const lastTradeOnlySnapshot = applyMarkPricePolicy(
     {
-      bestBid: null,
-      bestAsk: null,
-      lastTradePrice: 0.49
+      bestBid: 0.001,
+      bestAsk: 0.999,
+      lastTradePrice: 0.128,
+      markPrice: 0.128
+    },
+    {
+      assetId: "token-yes",
+      bestBid: 0.001,
+      bestAsk: 0.999,
+      lastTradePrice: 0.128
+    }
+  );
+
+  assert.equal(lastTradeOnlySnapshot.midpoint, null);
+  assert.equal(lastTradeOnlySnapshot.markPrice, 0.128);
+});
+
+test("mark policy clamps abnormal jumps against previous mark", () => {
+  const clampedSnapshot = applyMarkPricePolicy(
+    {
+      bestBid: 0.49,
+      bestAsk: 0.51,
+      lastTradePrice: 0.5,
+      markPrice: 0.5
     },
     {
       assetId: "token-yes",
       bestBid: null,
       bestAsk: null,
-      lastTradePrice: 0.51
+      lastTradePrice: 0.9
     }
   );
 
-  assert.equal(lastTradeOnlySnapshot.midpoint, null);
-  assert.equal(lastTradeOnlySnapshot.markPrice, 0.51);
+  assert.equal(clampedSnapshot.markPrice, 0.65);
+});
+
+test("mark policy keeps previous mark when new data is unusable", () => {
+  const preservedSnapshot = applyMarkPricePolicy(
+    {
+      bestBid: 0.48,
+      bestAsk: 0.52,
+      lastTradePrice: 0.5,
+      markPrice: 0.5
+    },
+    {
+      assetId: "token-yes",
+      bestBid: null,
+      bestAsk: null,
+      lastTradePrice: null
+    }
+  );
+
+  assert.equal(preservedSnapshot.markPrice, 0.5);
 });
 
 test("parsePolymarketPriceEvents derives top of book from book events", () => {

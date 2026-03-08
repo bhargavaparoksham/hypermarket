@@ -26,5 +26,7 @@ export const MARKET_DISCOVERY_DEFAULTS = {
 
 export const MARKET_PRICE_DEFAULTS = {
   redisKeyPrefix: "hypermarket:prices",
-  historyLimit: 25
+  historyLimit: 25,
+  maxMidpointSpread: 0.2,
+  maxMarkPriceJump: 0.15
 } as const;
