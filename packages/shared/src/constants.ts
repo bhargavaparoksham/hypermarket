@@ -23,3 +23,8 @@ export const RISK_PARAMETERS = {
 export const MARKET_DISCOVERY_DEFAULTS = {
   cacheTtlMs: 30_000
 } as const;
+
+export const MARKET_PRICE_DEFAULTS = {
+  redisKeyPrefix: "hypermarket:prices",
+  historyLimit: 25
+} as const;

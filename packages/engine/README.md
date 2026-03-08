@@ -10,6 +10,8 @@ Current scope:
 - Prisma schema and migration files
 - Redis and BullMQ queue scaffolding
 - allowlisted Polymarket market discovery via `GET /markets`
+- allowlisted Polymarket price ingestion into Redis via the worker
+- market price reads via `GET /markets/:marketId/prices`
 
 ## Market Discovery
 
@@ -26,6 +28,21 @@ Optional configuration:
 
 - `MARKET_DISCOVERY_CACHE_TTL_MS` controls the in-memory cache TTL for the
   `/markets` response and defaults to `30000`
+
+## Price Ingestion
+
+The worker now:
+
+- resolves allowlisted markets to Polymarket outcome token IDs
+- subscribes to the CLOB market websocket for only those token IDs
+- tracks `bestBid`, `bestAsk`, `midpoint`, `lastTradePrice`, and `markPrice`
+- writes current snapshots plus capped recent history into Redis
+
+The API exposes `GET /markets/:marketId/prices` to read the latest cached price
+snapshots for that market.
+
+Staleness is currently derived from the shared
+`RISK_PARAMETERS.stalePriceThresholdMs` value.
 
 ## Database Workflow
 

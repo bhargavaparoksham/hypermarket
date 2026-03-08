@@ -2,9 +2,11 @@ import { createServer, IncomingMessage, ServerResponse } from "node:http";
 import { EngineConfig } from "./types.js";
 import { Logger } from "./logger.js";
 import { MarketDiscoveryService } from "./markets/market-service.js";
+import { MarketPriceStore } from "./prices/price-store.js";
 
 interface HttpServices {
   marketDiscoveryService: MarketDiscoveryService;
+  marketPriceStore: MarketPriceStore;
 }
 
 function writeJson(
@@ -24,9 +26,10 @@ async function handleRequest(
   logger: Logger,
   services: HttpServices
 ): Promise<void> {
-  const url = request.url || "/";
+  const requestUrl = new URL(request.url || "/", `http://${config.host}:${config.port}`);
+  const pathname = requestUrl.pathname;
 
-  if (request.method === "GET" && url === "/healthz") {
+  if (request.method === "GET" && pathname === "/healthz") {
     writeJson(response, 200, {
       ok: true,
       mode: config.mode
@@ -34,7 +37,7 @@ async function handleRequest(
     return;
   }
 
-  if (request.method === "GET" && url === "/readyz") {
+  if (request.method === "GET" && pathname === "/readyz") {
     writeJson(response, 200, {
       ok: true,
       dependencies: {
@@ -51,7 +54,7 @@ async function handleRequest(
     return;
   }
 
-  if (request.method === "GET" && url === "/markets") {
+  if (request.method === "GET" && pathname === "/markets") {
     try {
       const markets = await services.marketDiscoveryService.listMarkets();
       writeJson(response, 200, {
@@ -67,6 +70,30 @@ async function handleRequest(
       writeJson(response, 502, {
         ok: false,
         error: "Unable to fetch allowlisted markets"
+      });
+    }
+    return;
+  }
+
+  const marketPricesMatch = pathname.match(/^\/markets\/([^/]+)\/prices$/);
+  if (request.method === "GET" && marketPricesMatch) {
+    try {
+      const marketId = decodeURIComponent(marketPricesMatch[1]);
+      const prices = await services.marketPriceStore.listSnapshots(marketId);
+      writeJson(response, 200, {
+        ok: true,
+        marketId,
+        prices
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown price lookup error";
+      logger.error("Failed to load market prices", {
+        error: message
+      });
+      writeJson(response, 502, {
+        ok: false,
+        error: "Unable to fetch market prices"
       });
     }
     return;

@@ -192,15 +192,17 @@ Exit criteria:
 
 ### 4.2 Implement price ingestion
 
-- [ ] Connect to Polymarket CLOB or market data source
-- [ ] Track best bid, ask, midpoint, and last trade
-- [ ] Publish mark prices into Redis
-- [ ] Persist useful snapshots if needed for debugging
-- [ ] Add stale-price detection
+- [x] Connect to Polymarket CLOB or market data source
+- [x] Track best bid, ask, midpoint, and last trade
+- [x] Publish mark prices into Redis
+- [x] Persist useful snapshots if needed for debugging
+- [x] Add stale-price detection
 
 Exit criteria:
 
 - engine maintains a current mark price stream for MVP markets
+- verified with unit tests for parsing/storage/feed wiring and a live Redis +
+  Polymarket websocket smoke test against an active market
 
 ### 4.3 Define mark-price policy
 
@@ -430,4 +432,10 @@ Hypermarket MVP is done when all of the following are true:
 
 ## Current Recommended Next Task
 
-Start with `4.1 Integrate market discovery`.
+Start with `4.3 Define mark-price policy`.
+
+Concrete focus:
+
+- implement midpoint guardrails for thin or distorted books
+- add fallback ordering between midpoint and last trade
+- clamp abnormal jumps with explicit tests against live-observed edge cases

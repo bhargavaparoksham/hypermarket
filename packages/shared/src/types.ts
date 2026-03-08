@@ -30,6 +30,19 @@ export interface SupportedMarket {
   outcomes: SupportedMarketOutcome[];
 }
 
+export interface MarketPriceSnapshot {
+  marketId: string;
+  outcomeTokenId: string;
+  outcome: string | null;
+  bestBid: number | null;
+  bestAsk: number | null;
+  midpoint: number | null;
+  markPrice: number | null;
+  lastTradePrice: number | null;
+  updatedAt: string;
+  stale: boolean;
+ }
+
 export interface Market {
   id: string;
   slug: string;
