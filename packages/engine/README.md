@@ -12,6 +12,7 @@ Current scope:
 - allowlisted Polymarket market discovery via `GET /markets`
 - allowlisted Polymarket price ingestion into Redis via the worker
 - market price reads via `GET /markets/:marketId/prices`
+- account and position domain services for open/increase/reduce/close flows
 
 ## Market Discovery
 
@@ -51,6 +52,41 @@ Current mark-price policy:
 - fall back to fresh last trade when the book is thin or distorted
 - preserve the prior mark if new data is unusable
 - clamp per-update mark jumps to reduce abrupt outliers
+
+## Position Domain Logic
+
+The engine now includes service-layer domain logic for:
+
+- creating user and margin-account records on demand
+- syncing margin-account aggregates from active positions
+- opening long and short positions
+- averaging into an existing open position on the same market/outcome/side
+- partial close and full close flows
+- realized PnL updates and position status transitions
+
+This logic currently lives in:
+
+- `src/services/account-service.ts`
+- `src/services/position-service.ts`
+
+It is covered by focused service tests.
+
+## Margin And PnL Formulas
+
+The engine now has a dedicated formula layer in
+`src/services/risk-formulas.ts` for:
+
+- position notional
+- initial and maintenance margin
+- unrealized PnL for long and short positions
+- trade fees
+- equity, free collateral, and margin ratio
+
+The existing account and position services now use this formula layer for
+derived values instead of duplicating calculations inline.
+
+The next layer to tighten is 5.3: liquidation threshold and liquidation-state
+logic on top of these formulas.
 
 ## Database Workflow
 

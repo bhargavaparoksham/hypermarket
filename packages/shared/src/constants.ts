@@ -15,6 +15,8 @@ export const LEVERAGE_LIMITS = {
 export const RISK_PARAMETERS = {
   maintenanceMarginRatio: 0.05,
   liquidationBufferRatio: 0.01,
+  tradingFeeRate: 0.001,
+  freeCollateralBuffer: 0,
   maxPositionNotional: 10_000,
   maxAccountNotional: 25_000,
   stalePriceThresholdMs: 15_000

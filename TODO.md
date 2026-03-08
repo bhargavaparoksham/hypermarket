@@ -221,29 +221,33 @@ Exit criteria:
 
 ### 5.1 Implement account and position domain logic
 
-- [ ] Add account service
-- [ ] Add position service
-- [ ] Support opening long positions
-- [ ] Support opening short positions
-- [ ] Support partial close
-- [ ] Support full close
-- [ ] Implement average entry calculations
+- [x] Add account service
+- [x] Add position service
+- [x] Support opening long positions
+- [x] Support opening short positions
+- [x] Support partial close
+- [x] Support full close
+- [x] Implement average entry calculations
 
 Exit criteria:
 
 - engine can create and update virtual positions correctly in PostgreSQL
+- service-layer domain logic is covered for open/add/reduce/close flows and
+  margin-account aggregate syncing
 
 ### 5.2 Implement margin and PnL calculations
 
-- [ ] Compute notional, initial margin, maintenance margin, and equity
-- [ ] Compute unrealized PnL for long and short positions
-- [ ] Compute free collateral and margin ratio
-- [ ] Implement configurable fees and buffers
-- [ ] Add unit tests for core formulas
+- [x] Compute notional, initial margin, maintenance margin, and equity
+- [x] Compute unrealized PnL for long and short positions
+- [x] Compute free collateral and margin ratio
+- [x] Implement configurable fees and buffers
+- [x] Add unit tests for core formulas
 
 Exit criteria:
 
 - risk values are deterministic and covered by tests
+- formula layer is integrated into account and position services for derived
+  values
 
 ### 5.3 Implement liquidation logic
 
@@ -434,10 +438,11 @@ Hypermarket MVP is done when all of the following are true:
 
 ## Current Recommended Next Task
 
-Start with `5.1 Implement account and position domain logic`.
+Start with `5.3 Implement liquidation logic`.
 
 Concrete focus:
 
-- add account and position services in `packages/engine`
-- support long, short, partial close, and full close flows
-- persist average entry, realized PnL, and position status transitions in PostgreSQL
+- compute liquidation thresholds from the new margin and mark-price formulas
+- implement a liquidation candidate scanner over active positions
+- create liquidation jobs and position/account state transitions
+- add tests for the `10x long at 0.50 -> liquidate near 0.455` reference case
