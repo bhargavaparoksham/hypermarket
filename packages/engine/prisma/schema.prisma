@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PositionSide {
+  LONG
+  SHORT
+}
+
+enum PositionStatus {
+  OPEN
+  CLOSING
+  CLOSED
+  LIQUIDATING
+  LIQUIDATED
+}
+
+enum SettlementStatus {
+  PENDING
+  SUBMITTED
+  CONFIRMED
+  FAILED
+}
+
+enum LiquidationStatus {
+  QUEUED
+  IN_PROGRESS
+  SETTLED
+  FAILED
+}
+
+enum HedgeOrderStatus {
+  PENDING
+  SUBMITTED
+  FILLED
+  PARTIALLY_FILLED
+  CANCELLED
+  FAILED
+}
+
+model User {
+  id             String        @id @default(cuid())
+  walletAddress  String        @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  marginAccount  MarginAccount?
+  positions      Position[]
+  settlements    Settlement[]
+  liquidations   Liquidation[]
+  hedgeOrders    HedgeOrder[]
+}
+
+model MarginAccount {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  settledBalance     Decimal  @db.Decimal(20, 6)
+  usedMargin         Decimal  @db.Decimal(20, 6)
+  freeCollateral     Decimal  @db.Decimal(20, 6)
+  equity             Decimal  @db.Decimal(20, 6)
+  marginRatio        Decimal  @db.Decimal(20, 8)
+  totalUnrealizedPnl Decimal  @db.Decimal(20, 6)
+  lastSyncedAt       DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Position {
+  id                String         @id @default(cuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  marketId          String
+  outcomeTokenId    String?
+  side              PositionSide
+  status            PositionStatus
+  size              Decimal        @db.Decimal(20, 6)
+  notional          Decimal        @db.Decimal(20, 6)
+  leverage          Decimal        @db.Decimal(8, 4)
+  entryPrice        Decimal        @db.Decimal(12, 6)
+  markPrice         Decimal        @db.Decimal(12, 6)
+  liquidationPrice  Decimal        @db.Decimal(12, 6)
+  initialMargin     Decimal        @db.Decimal(20, 6)
+  maintenanceMargin Decimal        @db.Decimal(20, 6)
+  unrealizedPnl     Decimal        @db.Decimal(20, 6)
+  realizedPnl       Decimal        @db.Decimal(20, 6)
+  openedAt          DateTime       @default(now())
+  closedAt          DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  liquidations      Liquidation[]
+
+  @@index([userId, status])
+  @@index([marketId, status])
+}
+
+model Settlement {
+  id              String           @id @default(cuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  positionId      String?
+  amount          Decimal          @db.Decimal(20, 6)
+  pnl             Decimal          @db.Decimal(20, 6)
+  status          SettlementStatus
+  direction       String
+  transactionHash String?          @unique
+  errorMessage    String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId, status])
+}
+
+model Liquidation {
+  id               String            @id @default(cuid())
+  userId           String
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  positionId       String
+  position         Position          @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  marketId         String
+  markPrice        Decimal           @db.Decimal(12, 6)
+  liquidationPrice Decimal           @db.Decimal(12, 6)
+  penalty          Decimal           @db.Decimal(20, 6)
+  status           LiquidationStatus
+  reason           String?
+  triggeredAt      DateTime          @default(now())
+  settledAt        DateTime?
+  updatedAt        DateTime          @updatedAt
+
+  @@index([userId, status])
+  @@index([positionId])
+}
+
+model HedgeOrder {
+  id               String           @id @default(cuid())
+  userId           String?
+  user             User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  marketId         String
+  outcomeTokenId   String?
+  side             PositionSide
+  status           HedgeOrderStatus
+  targetNotional   Decimal          @db.Decimal(20, 6)
+  filledNotional   Decimal          @db.Decimal(20, 6)
+  averageFillPrice Decimal?         @db.Decimal(12, 6)
+  externalOrderId  String?
+  errorMessage     String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([marketId, status])
+}

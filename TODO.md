@@ -140,11 +140,11 @@ Exit criteria:
 
 ### 3.1 Bootstrap engine package
 
-- [ ] Add package manifest
-- [ ] Add TypeScript runtime config
-- [ ] Add entrypoints for API server and background workers
-- [ ] Add config loader and env validation
-- [ ] Add structured logging
+- [x] Add package manifest
+- [x] Add TypeScript runtime config
+- [x] Add entrypoints for API server and background workers
+- [x] Add config loader and env validation
+- [x] Add structured logging
 
 Exit criteria:
 
@@ -152,15 +152,15 @@ Exit criteria:
 
 ### 3.2 Add PostgreSQL and Prisma
 
-- [ ] Add Prisma schema
-- [ ] Define `User` model
-- [ ] Define `MarginAccount` model
-- [ ] Define `Position` model
-- [ ] Define `Settlement` model
-- [ ] Define `Liquidation` model
-- [ ] Define `HedgeOrder` model
-- [ ] Add initial migration
-- [ ] Add seed script if useful for local development
+- [x] Add Prisma schema
+- [x] Define `User` model
+- [x] Define `MarginAccount` model
+- [x] Define `Position` model
+- [x] Define `Settlement` model
+- [x] Define `Liquidation` model
+- [x] Define `HedgeOrder` model
+- [x] Add initial migration
+- [x] Add seed script if useful for local development
 
 Exit criteria:
 
@@ -430,4 +430,4 @@ Hypermarket MVP is done when all of the following are true:
 
 ## Current Recommended Next Task
 
-Start with `3.1 Bootstrap engine package` unless you want to broadcast contracts to Amoy now.
+Start with `3.3 Add Redis and BullMQ infrastructure`.

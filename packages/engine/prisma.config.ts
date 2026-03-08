@@ -1,0 +1,6 @@
+import { defineConfig } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  seed: "node --experimental-strip-types prisma/seed.ts"
+});

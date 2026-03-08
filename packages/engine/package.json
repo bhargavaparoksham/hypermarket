@@ -3,11 +3,28 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint src --ext .ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:seed": "prisma db seed",
     "test": "echo 'engine tests not configured yet'",
-    "dev": "echo 'engine dev server not bootstrapped yet'",
+    "dev": "node --watch --experimental-strip-types src/index.ts",
+    "dev:api": "node --watch --experimental-strip-types src/api.ts",
+    "dev:worker": "node --watch --experimental-strip-types src/worker.ts",
+    "start": "node dist/index.js",
+    "start:api": "node dist/api.js",
+    "start:worker": "node dist/worker.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.1"
+  },
+  "devDependencies": {
+    "prisma": "^6.4.1"
   }
 }

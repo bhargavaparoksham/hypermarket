@@ -1,3 +1,1 @@
-export const enginePackage = {
-  name: "@hypermarket/engine"
-};
+import "./api.js";
