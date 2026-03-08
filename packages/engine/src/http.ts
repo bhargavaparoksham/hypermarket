@@ -1,6 +1,11 @@
 import { createServer, IncomingMessage, ServerResponse } from "node:http";
 import { EngineConfig } from "./types.js";
 import { Logger } from "./logger.js";
+import { MarketDiscoveryService } from "./markets/market-service.js";
+
+interface HttpServices {
+  marketDiscoveryService: MarketDiscoveryService;
+}
 
 function writeJson(
   response: ServerResponse,
@@ -12,11 +17,13 @@ function writeJson(
   response.end(JSON.stringify(payload));
 }
 
-function handleRequest(
+async function handleRequest(
   request: IncomingMessage,
   response: ServerResponse,
-  config: EngineConfig
-): void {
+  config: EngineConfig,
+  logger: Logger,
+  services: HttpServices
+): Promise<void> {
   const url = request.url || "/";
 
   if (request.method === "GET" && url === "/healthz") {
@@ -44,15 +51,55 @@ function handleRequest(
     return;
   }
 
+  if (request.method === "GET" && url === "/markets") {
+    try {
+      const markets = await services.marketDiscoveryService.listMarkets();
+      writeJson(response, 200, {
+        ok: true,
+        markets
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown markets error";
+      logger.error("Failed to load allowlisted markets", {
+        error: message
+      });
+      writeJson(response, 502, {
+        ok: false,
+        error: "Unable to fetch allowlisted markets"
+      });
+    }
+    return;
+  }
+
   writeJson(response, 404, {
     ok: false,
     error: "Not found"
   });
 }
 
-export function startHttpServer(config: EngineConfig, logger: Logger) {
+export function startHttpServer(
+  config: EngineConfig,
+  logger: Logger,
+  services: HttpServices
+) {
   const server = createServer((request, response) => {
-    handleRequest(request, response, config);
+    void handleRequest(request, response, config, logger, services).catch(
+      (error) => {
+        const message =
+          error instanceof Error ? error.message : "Unknown request error";
+        logger.error("Unhandled API request error", {
+          error: message
+        });
+
+        if (!response.headersSent) {
+          writeJson(response, 500, {
+            ok: false,
+            error: "Internal server error"
+          });
+        }
+      }
+    );
   });
 
   server.listen(config.port, config.host, () => {

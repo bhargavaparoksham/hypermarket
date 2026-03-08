@@ -19,3 +19,7 @@ export const RISK_PARAMETERS = {
   maxAccountNotional: 25_000,
   stalePriceThresholdMs: 15_000
 } as const;
+
+export const MARKET_DISCOVERY_DEFAULTS = {
+  cacheTtlMs: 30_000
+} as const;

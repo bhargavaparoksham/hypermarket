@@ -9,6 +9,23 @@ Current scope:
 - API and worker entrypoints
 - Prisma schema and migration files
 - Redis and BullMQ queue scaffolding
+- allowlisted Polymarket market discovery via `GET /markets`
+
+## Market Discovery
+
+The API exposes `GET /markets` to return normalized allowlisted Polymarket
+markets using the shared `SupportedMarket` shape from `@hypermarket/shared`.
+
+Required configuration:
+
+- `POLYMARKET_API_URL` should point at the Polymarket Gamma API base URL
+- `POLYMARKET_MARKET_ALLOWLIST` should be a comma-separated list of market
+  slugs, IDs, or condition IDs
+
+Optional configuration:
+
+- `MARKET_DISCOVERY_CACHE_TTL_MS` controls the in-memory cache TTL for the
+  `/markets` response and defaults to `30000`
 
 ## Database Workflow
 

@@ -13,6 +13,7 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "test:db": "node --test --experimental-strip-types test/db.integration.test.ts",
+    "test:markets": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/markets.test.mjs",
     "test": "echo 'engine tests not configured yet'",
     "dev": "node --watch --experimental-strip-types src/index.ts",
     "dev:api": "node --watch --experimental-strip-types src/api.ts",
@@ -23,6 +24,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@hypermarket/shared": "workspace:*",
     "@prisma/client": "^6.4.1",
     "bullmq": "^5.58.5",
     "ioredis": "5.9.3"

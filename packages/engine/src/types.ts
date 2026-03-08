@@ -9,6 +9,8 @@ export interface EngineConfig {
   redisUrl: string;
   polymarketApiUrl: string;
   polymarketWsUrl: string;
+  polymarketMarketAllowlist: string[];
+  marketDiscoveryCacheTtlMs: number;
   polygonRpcUrl: string;
   vaultManagerPrivateKey: string;
   hyperVaultAddress: string;

@@ -1,4 +1,5 @@
 import { EngineConfig, EngineMode } from "./types.js";
+import { MARKET_DISCOVERY_DEFAULTS } from "@hypermarket/shared";
 
 const LOG_LEVELS = new Set(["debug", "info", "warn", "error"]);
 const ENGINE_MODES = new Set<EngineMode>(["api", "worker"]);
@@ -25,6 +26,15 @@ function parsePort(value: string): number {
   return port;
 }
 
+function parsePositiveInteger(name: string, value: string): number {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`Invalid ${name} value: ${value}`);
+  }
+
+  return parsed;
+}
+
 function parseLogLevel(value: string): EngineConfig["logLevel"] {
   if (!LOG_LEVELS.has(value)) {
     throw new Error(`Invalid LOG_LEVEL value: ${value}`);
@@ -49,6 +59,17 @@ function parseAddress(name: string, value: string): string {
   return value;
 }
 
+function parseAllowlist(value: string | undefined): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): EngineConfig {
   return {
     host: env.HOST || "0.0.0.0",
@@ -61,6 +82,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): EngineConfig {
       env.POLYMARKET_API_URL || getRequiredEnv(env, "POLYMARKET_API_URL"),
     polymarketWsUrl:
       env.POLYMARKET_WS_URL || getRequiredEnv(env, "POLYMARKET_WS_URL"),
+    polymarketMarketAllowlist: parseAllowlist(
+      env.POLYMARKET_MARKET_ALLOWLIST
+    ),
+    marketDiscoveryCacheTtlMs: parsePositiveInteger(
+      "MARKET_DISCOVERY_CACHE_TTL_MS",
+      env.MARKET_DISCOVERY_CACHE_TTL_MS ||
+        String(MARKET_DISCOVERY_DEFAULTS.cacheTtlMs)
+    ),
     polygonRpcUrl: env.POLYGON_RPC_URL || getRequiredEnv(env, "POLYGON_RPC_URL"),
     vaultManagerPrivateKey:
       env.VAULT_MANAGER_PRIVATE_KEY ||

@@ -6,6 +6,29 @@ import {
 } from "./enums.js";
 
 export type Address = `0x${string}`;
+export type MarketSource = "polymarket";
+
+export interface SupportedMarketOutcome {
+  id: string;
+  name: string;
+  tokenId: string | null;
+  price: number | null;
+  winner: boolean | null;
+}
+
+export interface SupportedMarket {
+  id: string;
+  slug: string;
+  conditionId: string | null;
+  question: string;
+  description: string | null;
+  active: boolean;
+  closed: boolean;
+  archived: boolean;
+  endDate: string | null;
+  source: MarketSource;
+  outcomes: SupportedMarketOutcome[];
+}
 
 export interface Market {
   id: string;

@@ -181,10 +181,10 @@ Exit criteria:
 
 ### 4.1 Integrate market discovery
 
-- [ ] Add Polymarket client module
-- [ ] Fetch a configurable allowlist of markets
-- [ ] Normalize market metadata into shared shapes
-- [ ] Expose engine endpoint for live markets
+- [x] Add Polymarket client module
+- [x] Fetch a configurable allowlist of markets
+- [x] Normalize market metadata into shared shapes
+- [x] Expose engine endpoint for live markets
 
 Exit criteria:
 
