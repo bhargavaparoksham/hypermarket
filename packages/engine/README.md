@@ -88,6 +88,21 @@ derived values instead of duplicating calculations inline.
 The next layer to tighten is 5.3: liquidation threshold and liquidation-state
 logic on top of these formulas.
 
+## Liquidation Logic
+
+The engine now includes a liquidation service in
+`src/services/liquidation-service.ts` that handles:
+
+- liquidation threshold calculation
+- candidate scanning against current mark prices
+- liquidation record creation
+- queue job creation for liquidations
+- position transition to `LIQUIDATING`
+- final liquidation settlement to `LIQUIDATED`
+
+The reference `10x` long at `0.50` now produces a liquidation price of
+approximately `0.455`, and that case is covered in tests.
+
 ## Database Workflow
 
 The database schema and migration path have been verified against a real PostgreSQL instance running in Docker.

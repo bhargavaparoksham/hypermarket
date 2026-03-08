@@ -5,6 +5,7 @@ import {
 } from "./account-service.js";
 import { DECIMAL_ONE, DECIMAL_ZERO, toDecimal } from "./decimal.js";
 import {
+  calculateLiquidationPrice,
   calculateInitialMargin,
   calculateMaintenanceMargin,
   calculatePositionNotional,
@@ -76,7 +77,7 @@ interface OpenPositionInput {
   entryPrice: Decimal | number | string;
   leverage: Decimal | number | string;
   markPrice?: Decimal | number | string;
-  liquidationPrice: Decimal | number | string;
+  liquidationPrice?: Decimal | number | string;
   initialMargin?: Decimal | number | string;
   maintenanceMargin?: Decimal | number | string;
 }
@@ -119,7 +120,14 @@ export function createPositionService(prisma: PositionPrismaLike): PositionServi
         const leverage = toDecimal(input.leverage);
         const markPrice = toDecimal(input.markPrice ?? input.entryPrice);
         const notional = calculatePositionNotional(size, entryPrice);
-        const liquidationPrice = toDecimal(input.liquidationPrice);
+        const liquidationPrice =
+          input.liquidationPrice !== undefined
+            ? toDecimal(input.liquidationPrice)
+            : calculateLiquidationPrice(
+                input.side,
+                entryPrice,
+                leverage
+              );
         const initialMargin =
           input.initialMargin !== undefined
             ? toDecimal(input.initialMargin)

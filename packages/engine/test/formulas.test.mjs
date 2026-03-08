@@ -5,6 +5,7 @@ import {
   calculateEquity,
   calculateFreeCollateral,
   calculateInitialMargin,
+  calculateLiquidationPrice,
   calculateMaintenanceMargin,
   calculateMarginRatio,
   calculatePositionNotional,
@@ -31,6 +32,10 @@ test("computes unrealized pnl for long and short positions", () => {
     calculateUnrealizedPnl("SHORT", "0.60", "0.52", "50").toString(),
     "4"
   );
+});
+
+test("computes the reference liquidation price for a 10x long at 0.50", () => {
+  assert.equal(calculateLiquidationPrice("LONG", "0.50", "10").toString(), "0.455");
 });
 
 test("computes fees, equity, free collateral, and margin ratio", () => {

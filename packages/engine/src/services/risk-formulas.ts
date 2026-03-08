@@ -38,6 +38,25 @@ export function calculateMaintenanceMargin(
   return toDecimal(notional).mul(toDecimal(maintenanceMarginRatio));
 }
 
+export function calculateLiquidationPrice(
+  side: PositionSide,
+  entryPrice: Decimal | number | string,
+  leverage: Decimal | number | string,
+  liquidationBufferRatio:
+    | Decimal
+    | number
+    | string = RISK_PARAMETERS.liquidationBufferRatio
+): Decimal {
+  const entry = toDecimal(entryPrice);
+  const lev = toDecimal(leverage);
+  const buffer = entry.mul(toDecimal(liquidationBufferRatio));
+  const bankruptcyMove = entry.div(lev);
+
+  return side === "LONG"
+    ? entry.minus(bankruptcyMove).plus(buffer)
+    : entry.plus(bankruptcyMove).minus(buffer);
+}
+
 export function calculateTradeFee(
   notional: Decimal | number | string,
   feeRate: Decimal | number | string = RISK_PARAMETERS.tradingFeeRate

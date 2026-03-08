@@ -15,6 +15,7 @@
     "test:db": "node --test --experimental-strip-types test/db.integration.test.ts",
     "test:domain": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/domain.test.mjs",
     "test:formulas": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/formulas.test.mjs",
+    "test:liquidation": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/liquidation.test.mjs",
     "test:markets": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/markets.test.mjs",
     "test:prices": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/prices.test.mjs",
     "test": "echo 'engine tests not configured yet'",

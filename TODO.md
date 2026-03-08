@@ -251,16 +251,18 @@ Exit criteria:
 
 ### 5.3 Implement liquidation logic
 
-- [ ] Compute liquidation thresholds
-- [ ] Implement liquidation candidate scanner
-- [ ] Create liquidation jobs
-- [ ] Apply liquidation state transitions to positions and accounts
-- [ ] Record liquidation events in the database
-- [ ] Add tests using the `10x long at 0.50 -> liquidate near 0.455` reference scenario
+- [x] Compute liquidation thresholds
+- [x] Implement liquidation candidate scanner
+- [x] Create liquidation jobs
+- [x] Apply liquidation state transitions to positions and accounts
+- [x] Record liquidation events in the database
+- [x] Add tests using the `10x long at 0.50 -> liquidate near 0.455` reference scenario
 
 Exit criteria:
 
 - liquidatable positions are detected and closed consistently before bankruptcy
+- service-layer liquidation lifecycle is covered for detect -> queue ->
+  liquidating -> liquidated
 
 ## Phase 6: Settlement Bridge
 
@@ -438,11 +440,10 @@ Hypermarket MVP is done when all of the following are true:
 
 ## Current Recommended Next Task
 
-Start with `5.3 Implement liquidation logic`.
+Start with `6.1 Mirror vault state into engine account state`.
 
 Concrete focus:
 
-- compute liquidation thresholds from the new margin and mark-price formulas
-- implement a liquidation candidate scanner over active positions
-- create liquidation jobs and position/account state transitions
-- add tests for the `10x long at 0.50 -> liquidate near 0.455` reference case
+- add deposit and withdrawal state mirroring from `HyperVault`
+- keep engine `settledBalance` in sync with on-chain settlement state
+- define how pending on-chain settlement states affect off-chain account equity
