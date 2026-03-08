@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { PrismaClient, Prisma } from "@prisma/client";
+import prismaClientPkg from "@prisma/client";
+
+const { PrismaClient, Prisma } = prismaClientPkg;
 
 const databaseUrl = process.env.DATABASE_URL;
 

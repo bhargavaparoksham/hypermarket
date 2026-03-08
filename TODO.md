@@ -16,6 +16,39 @@ Rules for using this file:
 - `[x]` completed
 - `[!]` blocked
 
+## Current Verified Test Commands
+
+- [x] Root backend aggregate: `pnpm test`
+- [x] Root backend + DB aggregate: `pnpm test:full`
+- [x] Engine DB integration against local Docker PostgreSQL: `pnpm test:db`
+
+Notes:
+
+- `pnpm test` currently covers contracts plus the engine service/unit suites
+- `pnpm test:full` adds Prisma migration + DB integration coverage on top
+- `packages/shared` and `packages/web` still do not have dedicated real test suites
+
+## Current Recommended Next Task
+
+This is the next task to pick up. If you are resuming work, start here unless priorities have changed.
+
+- Phase `7.1`: add exposure aggregation
+- First implementation target: `packages/engine/src/services/exposure-service.ts`
+- First test target: `packages/engine/test/exposure.test.mjs`
+
+Scope for this task:
+
+- aggregate protocol exposure by market and side
+- compute net long / net short / net notional per market
+- define the hedge-threshold inputs that Phase `7.2` will consume
+- expose internal risk metrics in a service-friendly shape before adding API/debug wiring
+
+Why this is next:
+
+- Phase `6` settlement and vault-sync work is done
+- Phase `7.1` is the next incomplete dependency for hedging
+- this keeps the next change set service-layer focused before adding external execution logic
+
 ## Phase 0: Repo Foundation
 
 ### 0.1 Initialize monorepo
@@ -437,13 +470,3 @@ Hypermarket MVP is done when all of the following are true:
 - the engine can close or liquidate the position based on risk rules
 - realized PnL is settled back to `HyperVault`
 - the user can withdraw the final settled balance on testnet
-
-## Current Recommended Next Task
-
-Start with `6.1 Mirror vault state into engine account state`.
-
-Concrete focus:
-
-- add deposit and withdrawal state mirroring from `HyperVault`
-- keep engine `settledBalance` in sync with on-chain settlement state
-- define how pending on-chain settlement states affect off-chain account equity

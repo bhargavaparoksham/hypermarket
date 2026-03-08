@@ -76,6 +76,39 @@ Initial package responsibilities:
 - `packages/web`: trading terminal, wallet flows, account views, and real-time UI
 - `packages/shared`: shared types, constants, ABI exports, and config used by all packages
 
+## Testing
+
+Current repo-level backend test commands:
+
+- `pnpm test`
+  - runs Foundry contract tests in offline mode
+  - runs the full engine service/unit suite
+- `pnpm test:db`
+  - generates the Prisma client
+  - applies engine migrations to the local test PostgreSQL instance
+  - runs the engine DB integration suite
+- `pnpm test:full`
+  - runs `pnpm test`
+  - then runs `pnpm test:db`
+
+Local PostgreSQL test target used by the repo:
+
+- `DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54329/hypermarket_test`
+
+Convenience helpers:
+
+- `pnpm db:test:up`
+- `pnpm db:test:start`
+- `pnpm db:test:stop`
+
+Current caveats:
+
+- `packages/shared` does not have a real standalone test suite yet
+- `packages/web` does not have a real standalone test suite yet
+- DB integration is part of `test:full`, not the default `pnpm test`
+
+Backend-focused operational details live in [BACKEND.md](/Users/bhargavaparoksham/Documents/build/hypermarket/BACKEND.md).
+
 ## System Overview
 
 ```text

@@ -13,6 +13,7 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "test:db": "node --test --experimental-strip-types test/db.integration.test.ts",
+    "test:db:local": "set -a; . ./.env.test; set +a; pnpm run db:generate && pnpm exec prisma migrate deploy --schema prisma/schema.prisma && pnpm run test:db",
     "test:domain": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/domain.test.mjs",
     "test:formulas": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/formulas.test.mjs",
     "test:liquidation": "pnpm --filter @hypermarket/shared build && pnpm build && node --test test/liquidation.test.mjs",

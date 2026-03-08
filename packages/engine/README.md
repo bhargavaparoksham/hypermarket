@@ -200,6 +200,28 @@ env DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54329/hypermarket_test
   pnpm --filter @hypermarket/engine test:db
 ```
 
+### 6. Local one-time setup used by this repo
+
+Create a local ignored env file at `packages/engine/.env.test`:
+
+```sh
+cp packages/engine/.env.test.example packages/engine/.env.test
+```
+
+Then use the root helpers:
+
+```sh
+pnpm db:test:up
+pnpm test:db
+```
+
+If the container already exists but is stopped:
+
+```sh
+pnpm db:test:start
+pnpm test:db
+```
+
 ## Verified Test Coverage
 
 The DB integration suite currently verifies:
