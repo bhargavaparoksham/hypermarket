@@ -2,11 +2,30 @@
   "name": "@hypermarket/web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "lint": "eslint src --ext .ts,.tsx",
+    "build": "next build",
+    "lint": "eslint . --ext .ts,.tsx",
     "test": "echo 'web tests not configured yet'",
-    "dev": "echo 'web app not bootstrapped yet'",
-    "typecheck": "tsc -p tsconfig.json"
+    "dev": "next dev",
+    "start": "next start",
+    "typecheck": "next typegen && tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@hypermarket/shared": "workspace:*",
+    "@tanstack/react-query": "^5.68.0",
+    "@wagmi/core": "^2.22.1",
+    "next": "^15.2.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "viem": "^2.47.0",
+    "wagmi": "^2.15.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
   }
 }

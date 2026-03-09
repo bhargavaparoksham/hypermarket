@@ -32,28 +32,28 @@ Notes:
 
 This is the next task to pick up. If you are resuming work, start here unless priorities have changed.
 
-- Phase `7.2`: implement hedge executor
-- Next implementation target: `packages/engine/src/services/polymarket-hedge-client.ts`
-- Next test target: `packages/engine/test/hedge-execution.test.mjs`
+- Phase `8.2`: build core trading terminal
+- Next implementation target: `packages/web/app/page.tsx`
+- Next test target: `packages/web` still has no dedicated automated test suite
 
 Scope for this task:
 
-- keep the new service-layer hedge executor and threshold policy as the decision boundary
-- replace the current hedge proxy/dry-run adapter path with direct Polymarket order signing and submission
-- harden worker orchestration and retries around `HedgeOrder` lifecycle transitions
-- add internal debug visibility once execution plumbing is stable
+- add a live markets sidebar backed by engine market reads
+- add the market detail panel and account summary layout
+- add the order ticket and leverage control shell
+- keep this pass UI-focused before wiring full trade submission
 
 Current note:
 
+- web bootstrap is now in place in `packages/web`
 - live hedging is intentionally deferred for the first end-to-end MVP pass
 - current repo support is dry-run mode or an external hedge proxy only
-- this item should be resumed when protocol-level exposure management becomes a priority
 
 Why this is next:
 
-- Phase `7.1` exposure aggregation is now available as a dependency
-- Phase `7.2` now has a service-layer executor boundary and focused tests
-- the next missing backend dependency is live execution plumbing plus orchestration
+- Phase `8.1` web bootstrap is now in place
+- the next highest-value MVP dependency is the actual trading surface
+- this unlocks end-to-end product flow faster than live hedging does
 
 ## Phase 0: Repo Foundation
 
@@ -369,14 +369,15 @@ Deferred follow-up artifact targets:
 
 ### 8.1 Bootstrap Next.js app
 
-- [ ] Initialize Next.js App Router app
-- [ ] Add Tailwind CSS
-- [ ] Add wallet connection with `wagmi` and `viem`
-- [ ] Add app-level providers and env config
+- [x] Initialize Next.js App Router app
+- [x] Add Tailwind CSS
+- [x] Add wallet connection with `wagmi` and `viem`
+- [x] Add app-level providers and env config
 
 Exit criteria:
 
-- web app runs locally and connects to wallet + engine
+- web app has a real Next.js scaffold with app router, providers, and env wiring
+- final local run verification still depends on installing the new frontend dependencies
 
 ### 8.2 Build core trading terminal
 
