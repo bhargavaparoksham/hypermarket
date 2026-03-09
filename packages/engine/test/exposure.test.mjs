@@ -99,6 +99,11 @@ test("aggregates active exposure by market and side", async () => {
   const [marketA, marketB] = snapshot.markets;
   assert.equal(marketA.marketId, "market-a");
   assert.equal(marketA.activePositionCount, 3);
+  assert.equal(marketA.outcomes.length, 2);
+  assert.equal(marketA.outcomes[0].outcomeTokenId, "no-token");
+  assert.equal(marketA.outcomes[0].netShortNotional.toString(), "2");
+  assert.equal(marketA.outcomes[1].outcomeTokenId, "yes-token");
+  assert.equal(marketA.outcomes[1].netLongNotional.toString(), "7.8");
   assert.equal(marketA.long.positionCount, 2);
   assert.equal(marketA.long.size.toString(), "14");
   assert.equal(marketA.long.notional.toString(), "7.8");
@@ -117,6 +122,8 @@ test("aggregates active exposure by market and side", async () => {
 
   assert.equal(marketB.marketId, "market-b");
   assert.equal(marketB.activePositionCount, 1);
+  assert.equal(marketB.outcomes.length, 1);
+  assert.equal(marketB.outcomes[0].outcomeTokenId, "yes-token");
   assert.equal(marketB.long.notional.toString(), "0");
   assert.equal(marketB.short.notional.toString(), "7.2");
   assert.equal(marketB.netNotional.toString(), "-7.2");

@@ -17,6 +17,22 @@ function getOptionalEnv(name: string, fallback: string): string {
   return process.env[name] || fallback;
 }
 
+function parseBoolean(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined) {
+    return fallback;
+  }
+
+  if (value === "true") {
+    return true;
+  }
+
+  if (value === "false") {
+    return false;
+  }
+
+  throw new Error(`Invalid boolean value: ${value}`);
+}
+
 function parsePort(value: string): number {
   const port = Number(value);
   if (!Number.isInteger(port) || port <= 0 || port > 65535) {
@@ -29,6 +45,15 @@ function parsePort(value: string): number {
 function parsePositiveInteger(name: string, value: string): number {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`Invalid ${name} value: ${value}`);
+  }
+
+  return parsed;
+}
+
+function parseNonNegativeNumber(name: string, value: string): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
     throw new Error(`Invalid ${name} value: ${value}`);
   }
 
@@ -70,6 +95,15 @@ function parseAllowlist(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+function parseOptionalEnv(value: string | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): EngineConfig {
   return {
     host: env.HOST || "0.0.0.0",
@@ -82,6 +116,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): EngineConfig {
       env.POLYMARKET_API_URL || getRequiredEnv(env, "POLYMARKET_API_URL"),
     polymarketWsUrl:
       env.POLYMARKET_WS_URL || getRequiredEnv(env, "POLYMARKET_WS_URL"),
+    polymarketHedgeProxyUrl: parseOptionalEnv(env.POLYMARKET_HEDGE_PROXY_URL),
+    polymarketHedgeApiKey: parseOptionalEnv(env.POLYMARKET_HEDGE_API_KEY),
+    polymarketHedgeDryRun: parseBoolean(env.POLYMARKET_HEDGE_DRY_RUN, true),
     polymarketMarketAllowlist: parseAllowlist(
       env.POLYMARKET_MARKET_ALLOWLIST
     ),
@@ -90,6 +127,24 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): EngineConfig {
       env.MARKET_DISCOVERY_CACHE_TTL_MS ||
         String(MARKET_DISCOVERY_DEFAULTS.cacheTtlMs)
     ),
+    hedgeExecutionIntervalMs: parsePositiveInteger(
+      "HEDGE_EXECUTION_INTERVAL_MS",
+      env.HEDGE_EXECUTION_INTERVAL_MS || "10000"
+    ),
+    hedgeMinNetNotional: parseNonNegativeNumber(
+      "HEDGE_MIN_NET_NOTIONAL",
+      env.HEDGE_MIN_NET_NOTIONAL || "250"
+    ),
+    hedgeMinImbalanceRatio: parseNonNegativeNumber(
+      "HEDGE_MIN_IMBALANCE_RATIO",
+      env.HEDGE_MIN_IMBALANCE_RATIO || "0.25"
+    ),
+    hedgeMaxOrderNotional: env.HEDGE_MAX_ORDER_NOTIONAL
+      ? parseNonNegativeNumber(
+          "HEDGE_MAX_ORDER_NOTIONAL",
+          env.HEDGE_MAX_ORDER_NOTIONAL
+        )
+      : null,
     polygonRpcUrl: env.POLYGON_RPC_URL || getRequiredEnv(env, "POLYGON_RPC_URL"),
     vaultManagerPrivateKey:
       env.VAULT_MANAGER_PRIVATE_KEY ||

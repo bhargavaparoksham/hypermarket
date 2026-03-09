@@ -9,7 +9,11 @@ import { createRedisMarketPriceStore } from "./prices/price-store.js";
 import { createPolymarketPriceFeed } from "./prices/polymarket-price-feed.js";
 import { createPrismaClient } from "./prisma.js";
 import { createHyperVaultChainClient } from "./services/hypervault-client.js";
+import { createExposureService } from "./services/exposure-service.js";
+import { createHedgeExecutionService } from "./services/hedge-execution-service.js";
+import { createPolymarketHedgeClient } from "./services/polymarket-hedge-client.js";
 import { createSettlementService } from "./services/settlement-service.js";
+import { startHedgeExecutionLoop } from "./workers/hedge-worker.js";
 
 const { config, logger } = createRuntime();
 
@@ -38,8 +42,33 @@ const settlementService = createSettlementService(
   chainClient,
   logger
 );
+const hedgeExecutionService = createHedgeExecutionService(
+  prisma,
+  createPolymarketHedgeClient({
+    executionUrl: config.polymarketHedgeProxyUrl,
+    apiKey: config.polymarketHedgeApiKey,
+    dryRun: config.polymarketHedgeDryRun,
+    logger
+  }),
+  {
+    defaultThresholds: {
+      minNetNotional: String(config.hedgeMinNetNotional),
+      minImbalanceRatio: String(config.hedgeMinImbalanceRatio),
+      maxHedgeNotional:
+        config.hedgeMaxOrderNotional === null
+          ? null
+          : String(config.hedgeMaxOrderNotional)
+    }
+  }
+);
 startLiquidationWorker(redis, logger);
 startSettlementWorker(redis, settlementService, logger);
+startHedgeExecutionLoop({
+  exposureService: createExposureService(prisma),
+  hedgeExecutionService,
+  intervalMs: config.hedgeExecutionIntervalMs,
+  logger
+});
 
 void marketDiscoveryService
   .listMarkets()

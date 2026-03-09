@@ -1,7 +1,8 @@
 import { Decimal } from "@prisma/client/runtime/library";
 import {
   ExposureSnapshot,
-  MarketExposureSummary
+  MarketExposureSummary,
+  OutcomeExposureSummary
 } from "./exposure-service.js";
 import { DECIMAL_ZERO, toDecimal, type DecimalValue } from "./decimal.js";
 import { PositionSide } from "./position-service.js";
@@ -31,6 +32,7 @@ interface HedgeOrderDelegate {
   findFirst(args: {
     where: {
       marketId: string;
+      outcomeTokenId?: string | null;
       status: { in: readonly HedgeOrderStatus[] };
     };
   }): Promise<HedgeOrderRecord | null>;
@@ -69,6 +71,7 @@ export interface HedgeThresholdPolicy {
 
 export interface HedgeCandidate {
   marketId: string;
+  outcomeTokenId: string;
   side: PositionSide;
   targetNotional: Decimal;
   exposure: MarketExposureSummary;
@@ -86,6 +89,7 @@ export interface HedgeExecutionResult {
 export interface HedgeExecutionAdapter {
   executeHedge(input: {
     marketId: string;
+    outcomeTokenId: string;
     side: PositionSide;
     targetNotional: Decimal;
   }): Promise<HedgeExecutionResult>;
@@ -150,6 +154,34 @@ function targetNotionalForExposure(
   }
 
   return uncapped;
+}
+
+function selectOutcomeForExposure(
+  exposure: MarketExposureSummary,
+  side: PositionSide
+): OutcomeExposureSummary | null {
+  const candidates = exposure.outcomes.filter((outcome) => {
+    if (!outcome.outcomeTokenId) {
+      return false;
+    }
+
+    return side === "SHORT"
+      ? outcome.netLongNotional.greaterThan(DECIMAL_ZERO)
+      : outcome.netShortNotional.greaterThan(DECIMAL_ZERO);
+  });
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  return candidates.reduce((best, current) => {
+    const bestNet =
+      side === "SHORT" ? best.netLongNotional : best.netShortNotional;
+    const currentNet =
+      side === "SHORT" ? current.netLongNotional : current.netShortNotional;
+
+    return currentNet.greaterThan(bestNet) ? current : best;
+  });
 }
 
 function executionStatusCounts(
@@ -225,6 +257,11 @@ export function createHedgeExecutionService(
           return [];
         }
 
+        const dominantOutcome = selectOutcomeForExposure(exposure, side);
+        if (!dominantOutcome?.outcomeTokenId) {
+          return [];
+        }
+
         const targetNotional = targetNotionalForExposure(
           exposure,
           thresholdPolicy
@@ -237,6 +274,7 @@ export function createHedgeExecutionService(
         return [
           {
             marketId: exposure.marketId,
+            outcomeTokenId: dominantOutcome.outcomeTokenId,
             side,
             targetNotional,
             exposure,
@@ -263,6 +301,7 @@ export function createHedgeExecutionService(
         const existing = await prisma.hedgeOrder.findFirst({
           where: {
             marketId: candidate.marketId,
+            outcomeTokenId: candidate.outcomeTokenId,
             status: {
               in: [...OPEN_HEDGE_STATUSES]
             }
@@ -280,7 +319,7 @@ export function createHedgeExecutionService(
         const hedgeOrder = await prisma.hedgeOrder.create({
           data: {
             marketId: candidate.marketId,
-            outcomeTokenId: null,
+            outcomeTokenId: candidate.outcomeTokenId,
             side: candidate.side,
             status: "PENDING",
             targetNotional: candidate.targetNotional,
@@ -295,6 +334,7 @@ export function createHedgeExecutionService(
         try {
           const result = await adapter.executeHedge({
             marketId: candidate.marketId,
+            outcomeTokenId: candidate.outcomeTokenId,
             side: candidate.side,
             targetNotional: candidate.targetNotional
           });

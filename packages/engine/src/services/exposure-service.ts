@@ -53,11 +53,23 @@ export interface MarketExposureSummary {
   activePositionCount: number;
   long: ExposureSideMetrics;
   short: ExposureSideMetrics;
+  outcomes: OutcomeExposureSummary[];
   grossNotional: Decimal;
   netNotional: Decimal;
   netLongNotional: Decimal;
   netShortNotional: Decimal;
   hedgeThresholdInputs: HedgeThresholdInputs;
+}
+
+export interface OutcomeExposureSummary {
+  outcomeTokenId: string | null;
+  activePositionCount: number;
+  long: ExposureSideMetrics;
+  short: ExposureSideMetrics;
+  grossNotional: Decimal;
+  netNotional: Decimal;
+  netLongNotional: Decimal;
+  netShortNotional: Decimal;
 }
 
 export interface ExposureTotals {
@@ -157,7 +169,8 @@ function buildThresholdInputs(
 function buildMarketExposureSummary(
   marketId: string,
   long: ExposureSideMetrics,
-  short: ExposureSideMetrics
+  short: ExposureSideMetrics,
+  outcomes: OutcomeExposureSummary[]
 ): MarketExposureSummary {
   const hedgeThresholdInputs = buildThresholdInputs(long.notional, short.notional);
 
@@ -166,6 +179,7 @@ function buildMarketExposureSummary(
     activePositionCount: long.positionCount + short.positionCount,
     long,
     short,
+    outcomes,
     grossNotional: hedgeThresholdInputs.grossNotional,
     netNotional: hedgeThresholdInputs.netNotional,
     netLongNotional: hedgeThresholdInputs.netLongNotional,
@@ -194,30 +208,89 @@ export function createExposureService(prisma: ExposurePrismaLike): ExposureServi
 
       const exposureByMarket = new Map<
         string,
-        { long: ExposureSideMetrics; short: ExposureSideMetrics }
+        {
+          long: ExposureSideMetrics;
+          short: ExposureSideMetrics;
+          outcomes: Map<string | null, { long: ExposureSideMetrics; short: ExposureSideMetrics }>;
+        }
       >();
 
       for (const position of positions) {
         const existing = exposureByMarket.get(position.marketId) ?? {
           long: createEmptySideMetrics(),
-          short: createEmptySideMetrics()
+          short: createEmptySideMetrics(),
+          outcomes: new Map()
         };
         const nextMetrics = addSideMetrics(
           position.side === "LONG" ? existing.long : existing.short,
           toSideMetrics(position)
         );
+        const existingOutcome =
+          existing.outcomes.get(position.outcomeTokenId) ?? {
+            long: createEmptySideMetrics(),
+            short: createEmptySideMetrics()
+          };
+        const nextOutcomeMetrics = addSideMetrics(
+          position.side === "LONG" ? existingOutcome.long : existingOutcome.short,
+          toSideMetrics(position)
+        );
+
+        existing.outcomes.set(position.outcomeTokenId, {
+          long:
+            position.side === "LONG" ? nextOutcomeMetrics : existingOutcome.long,
+          short:
+            position.side === "SHORT" ? nextOutcomeMetrics : existingOutcome.short
+        });
 
         exposureByMarket.set(position.marketId, {
           long: position.side === "LONG" ? nextMetrics : existing.long,
-          short: position.side === "SHORT" ? nextMetrics : existing.short
+          short: position.side === "SHORT" ? nextMetrics : existing.short,
+          outcomes: existing.outcomes
         });
       }
 
       const markets = [...exposureByMarket.entries()]
         .sort(([left], [right]) => left.localeCompare(right))
-        .map(([marketId, summary]) =>
-          buildMarketExposureSummary(marketId, summary.long, summary.short)
-        );
+        .map(([marketId, summary]) => {
+          const outcomes = [...summary.outcomes.entries()]
+            .sort(([left], [right]) => {
+              if (left === null) {
+                return 1;
+              }
+
+              if (right === null) {
+                return -1;
+              }
+
+              return left.localeCompare(right);
+            })
+            .map(([outcomeTokenId, outcomeSummary]) => {
+              const thresholdInputs = buildThresholdInputs(
+                outcomeSummary.long.notional,
+                outcomeSummary.short.notional
+              );
+
+              return {
+                outcomeTokenId,
+                activePositionCount:
+                  outcomeSummary.long.positionCount +
+                  outcomeSummary.short.positionCount,
+                long: outcomeSummary.long,
+                short: outcomeSummary.short,
+                grossNotional: thresholdInputs.grossNotional,
+                netNotional: thresholdInputs.netNotional,
+                netLongNotional: thresholdInputs.netLongNotional,
+                netShortNotional: thresholdInputs.netShortNotional
+              };
+            });
+
+          return buildMarketExposureSummary(
+            marketId,
+            summary.long,
+            summary.short,
+            outcomes
+          );
+        });
 
       const totals = markets.reduce<ExposureTotals>(
         (aggregate, market) => ({

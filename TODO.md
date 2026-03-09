@@ -39,9 +39,15 @@ This is the next task to pick up. If you are resuming work, start here unless pr
 Scope for this task:
 
 - keep the new service-layer hedge executor and threshold policy as the decision boundary
-- add a real Polymarket execution adapter behind that boundary
-- wire worker orchestration and retries around `HedgeOrder` lifecycle transitions
+- replace the current hedge proxy/dry-run adapter path with direct Polymarket order signing and submission
+- harden worker orchestration and retries around `HedgeOrder` lifecycle transitions
 - add internal debug visibility once execution plumbing is stable
+
+Current note:
+
+- live hedging is intentionally deferred for the first end-to-end MVP pass
+- current repo support is dry-run mode or an external hedge proxy only
+- this item should be resumed when protocol-level exposure management becomes a priority
 
 Why this is next:
 
@@ -341,13 +347,23 @@ Exit criteria:
 - [x] Place hedge orders when thresholds are breached
 - [x] Persist hedge attempts and results
 - [~] Add failure handling and manual recovery notes
+- [~] Wire worker orchestration for periodic hedge evaluation
+- [ ] Implement direct live Polymarket order signing/submission in-repo
+- [ ] Add runbook and operator controls for live hedge execution enablement
 
 Exit criteria:
 
 - service-layer hedge execution is covered for threshold breach, dedupe, and
   adapter failure handling
+- hedge polling now runs in the worker against token-aware exposure snapshots
 - remaining work is real execution plumbing before MVP can reduce aggregate
   protocol exposure on supported markets
+
+Deferred follow-up artifact targets:
+
+- `packages/engine/src/services/polymarket-hedge-client.ts`
+- `packages/engine/src/workers/hedge-worker.ts`
+- focused tests around direct execution, retries, and recovery
 
 ## Phase 8: Web App
 

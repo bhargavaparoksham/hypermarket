@@ -48,6 +48,7 @@ The MVP should explicitly avoid:
 - portfolio margin
 - permissionless liquidation bots
 - multi-chain support
+- direct live Polymarket hedge execution inside this repo for the first end-to-end MVP pass
 
 ## Monorepo Layout
 
@@ -294,7 +295,10 @@ The engine periodically computes net exposure:
 - by outcome
 - by direction
 
-When net risk exceeds thresholds, the hedge worker places offsetting orders on Polymarket.
+When net risk exceeds thresholds, the hedge worker can create hedge intents and
+operator-visible `HedgeOrder` records. For the current MVP pass, live
+Polymarket execution is deferred and the engine stays in dry-run or proxy mode
+until a direct execution path is added later.
 
 This is one of the most important architectural choices in the MVP:
 
@@ -382,7 +386,8 @@ Suggested contents:
 4. The engine validates collateral, pricing, and risk limits.
 5. The engine records a virtual position in PostgreSQL.
 6. The UI updates immediately from engine state.
-7. If aggregate exposure breaches thresholds, the hedge worker executes on Polymarket.
+7. If aggregate exposure breaches thresholds, the hedge worker records hedge
+   intents and can submit them only through the current dry-run/proxy boundary.
 
 ### Close Position
 
@@ -514,7 +519,7 @@ Recommended implementation sequence:
 6. add PostgreSQL + Prisma models
 7. expose engine API for trading and account reads
 8. build Next.js terminal UI
-9. add hedge execution against Polymarket
+9. add direct live hedge execution against Polymarket
 10. harden reconciliation, auth, observability, and failure recovery
 
 ## What “MVP” Means Here

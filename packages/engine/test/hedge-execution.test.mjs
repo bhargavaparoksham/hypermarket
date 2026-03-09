@@ -129,7 +129,57 @@ test("creates and fills a hedge when exposure breaches thresholds", async () => 
           netLongNotional: decimal("7"),
           netShortNotional: decimal("0"),
           imbalanceRatio: decimal("0.63636363636363636364")
-        }
+        },
+        outcomes: [
+          {
+            outcomeTokenId: "yes-token",
+            activePositionCount: 1,
+            long: {
+              positionCount: 1,
+              size: decimal("10"),
+              notional: decimal("9"),
+              initialMargin: decimal("1"),
+              maintenanceMargin: decimal("0.2"),
+              unrealizedPnl: decimal("0.1")
+            },
+            short: {
+              positionCount: 0,
+              size: decimal("0"),
+              notional: decimal("0"),
+              initialMargin: decimal("0"),
+              maintenanceMargin: decimal("0"),
+              unrealizedPnl: decimal("0")
+            },
+            grossNotional: decimal("9"),
+            netNotional: decimal("9"),
+            netLongNotional: decimal("9"),
+            netShortNotional: decimal("0")
+          },
+          {
+            outcomeTokenId: "no-token",
+            activePositionCount: 1,
+            long: {
+              positionCount: 0,
+              size: decimal("0"),
+              notional: decimal("0"),
+              initialMargin: decimal("0"),
+              maintenanceMargin: decimal("0"),
+              unrealizedPnl: decimal("0")
+            },
+            short: {
+              positionCount: 1,
+              size: decimal("3"),
+              notional: decimal("2"),
+              initialMargin: decimal("0.3"),
+              maintenanceMargin: decimal("0.1"),
+              unrealizedPnl: decimal("-0.1")
+            },
+            grossNotional: decimal("2"),
+            netNotional: decimal("-2"),
+            netLongNotional: decimal("0"),
+            netShortNotional: decimal("2")
+          }
+        ]
       }
     ])
   );
@@ -141,11 +191,13 @@ test("creates and fills a hedge when exposure breaches thresholds", async () => 
   assert.equal(result.failed, 0);
   assert.equal(adapterCalls.length, 1);
   assert.equal(adapterCalls[0].side, "SHORT");
+  assert.equal(adapterCalls[0].outcomeTokenId, "yes-token");
   assert.equal(adapterCalls[0].targetNotional.toString(), "7");
 
   const [order] = prisma.hedgeOrders.values();
   assert.equal(order.status, "FILLED");
   assert.equal(order.side, "SHORT");
+  assert.equal(order.outcomeTokenId, "yes-token");
   assert.equal(order.targetNotional.toString(), "7");
   assert.equal(order.filledNotional.toString(), "7");
   assert.equal(order.averageFillPrice.toString(), "0.58");
@@ -206,7 +258,33 @@ test("skips markets below threshold and caps target notional when configured", a
           netLongNotional: decimal("8"),
           netShortNotional: decimal("0"),
           imbalanceRatio: decimal("1")
-        }
+        },
+        outcomes: [
+          {
+            outcomeTokenId: "yes-token",
+            activePositionCount: 1,
+            long: {
+              positionCount: 1,
+              size: decimal("10"),
+              notional: decimal("8"),
+              initialMargin: decimal("1"),
+              maintenanceMargin: decimal("0.2"),
+              unrealizedPnl: decimal("0")
+            },
+            short: {
+              positionCount: 0,
+              size: decimal("0"),
+              notional: decimal("0"),
+              initialMargin: decimal("0"),
+              maintenanceMargin: decimal("0"),
+              unrealizedPnl: decimal("0")
+            },
+            grossNotional: decimal("8"),
+            netNotional: decimal("8"),
+            netLongNotional: decimal("8"),
+            netShortNotional: decimal("0")
+          }
+        ]
       },
       {
         marketId: "market-b",
@@ -238,7 +316,33 @@ test("skips markets below threshold and caps target notional when configured", a
           netLongNotional: decimal("3"),
           netShortNotional: decimal("0"),
           imbalanceRatio: decimal("0.6")
-        }
+        },
+        outcomes: [
+          {
+            outcomeTokenId: "yes-token",
+            activePositionCount: 2,
+            long: {
+              positionCount: 1,
+              size: decimal("5"),
+              notional: decimal("4"),
+              initialMargin: decimal("1"),
+              maintenanceMargin: decimal("0.2"),
+              unrealizedPnl: decimal("0")
+            },
+            short: {
+              positionCount: 1,
+              size: decimal("2"),
+              notional: decimal("1"),
+              initialMargin: decimal("0.2"),
+              maintenanceMargin: decimal("0.1"),
+              unrealizedPnl: decimal("0")
+            },
+            grossNotional: decimal("5"),
+            netNotional: decimal("3"),
+            netLongNotional: decimal("3"),
+            netShortNotional: decimal("0")
+          }
+        ]
       }
     ])
   );
@@ -317,7 +421,33 @@ test("deduplicates when an open hedge order already exists for the market", asyn
           netLongNotional: decimal("9"),
           netShortNotional: decimal("0"),
           imbalanceRatio: decimal("1")
-        }
+        },
+        outcomes: [
+          {
+            outcomeTokenId: "yes-token",
+            activePositionCount: 1,
+            long: {
+              positionCount: 1,
+              size: decimal("10"),
+              notional: decimal("9"),
+              initialMargin: decimal("1"),
+              maintenanceMargin: decimal("0.2"),
+              unrealizedPnl: decimal("0")
+            },
+            short: {
+              positionCount: 0,
+              size: decimal("0"),
+              notional: decimal("0"),
+              initialMargin: decimal("0"),
+              maintenanceMargin: decimal("0"),
+              unrealizedPnl: decimal("0")
+            },
+            grossNotional: decimal("9"),
+            netNotional: decimal("9"),
+            netLongNotional: decimal("9"),
+            netShortNotional: decimal("0")
+          }
+        ]
       }
     ])
   );
@@ -376,7 +506,33 @@ test("marks hedge orders failed when adapter throws", async () => {
           netLongNotional: decimal("0"),
           netShortNotional: decimal("4"),
           imbalanceRatio: decimal("1")
-        }
+        },
+        outcomes: [
+          {
+            outcomeTokenId: "yes-token",
+            activePositionCount: 1,
+            long: {
+              positionCount: 0,
+              size: decimal("0"),
+              notional: decimal("0"),
+              initialMargin: decimal("0"),
+              maintenanceMargin: decimal("0"),
+              unrealizedPnl: decimal("0")
+            },
+            short: {
+              positionCount: 1,
+              size: decimal("10"),
+              notional: decimal("4"),
+              initialMargin: decimal("1"),
+              maintenanceMargin: decimal("0.2"),
+              unrealizedPnl: decimal("0")
+            },
+            grossNotional: decimal("4"),
+            netNotional: decimal("-4"),
+            netLongNotional: decimal("0"),
+            netShortNotional: decimal("4")
+          }
+        ]
       }
     ])
   );

@@ -117,6 +117,8 @@ Current behavior:
 - aggregates active positions with statuses `OPEN`, `CLOSING`, and
   `LIQUIDATING`
 - summarizes long and short exposure per market
+- includes per-outcome exposure breakdowns so hedge execution can resolve an
+  `outcomeTokenId`
 - computes `grossNotional`, signed `netNotional`, `netLongNotional`, and
   `netShortNotional`
 - returns hedge-threshold inputs including `absoluteNetNotional` and
@@ -141,6 +143,35 @@ Current behavior:
 
 This is still adapter-driven rather than a live Polymarket execution path, and
 it is covered by a focused hedge execution test suite.
+
+For the current MVP pass, live hedge execution is intentionally deferred. The
+existing code should be treated as internal decisioning plus dry-run/proxy
+submission support, not as a production-ready direct Polymarket executor.
+
+## Hedge Proxy Client
+
+The engine now includes `src/services/polymarket-hedge-client.ts`.
+
+Current behavior:
+
+- defaults to dry-run mode via `POLYMARKET_HEDGE_DRY_RUN=true`
+- posts token-aware hedge intents to a configured
+  `POLYMARKET_HEDGE_PROXY_URL/hedge` endpoint when dry-run is disabled
+- normalizes proxy responses into the existing hedge execution result states
+
+Important limitation:
+
+- this package does not yet sign and submit live Polymarket hedge orders by
+  itself
+- if no external hedge proxy is configured, hedge execution should remain in
+  dry-run mode
+
+Current hedge worker polling configuration:
+
+- `HEDGE_EXECUTION_INTERVAL_MS` defaults to `10000`
+- `HEDGE_MIN_NET_NOTIONAL` defaults to `250`
+- `HEDGE_MIN_IMBALANCE_RATIO` defaults to `0.25`
+- `HEDGE_MAX_ORDER_NOTIONAL` is optional
 
 ## Vault Balance Sync
 

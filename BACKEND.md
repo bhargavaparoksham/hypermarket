@@ -22,12 +22,16 @@ Now also completed:
 
 - Phase `7.1` exposure aggregation
 - Phase `7.2` service-layer hedge executor foundation
+- Phase `7.2` token-aware hedge proxy client and worker polling loop
 
 Current backend status:
 
 - contract settlement layer exists in `HyperVault`
 - engine tracks positions and risk off-chain
 - worker can process settlement jobs and poll vault balances
+- hedge polling can evaluate exposure and create token-aware hedge intents
+- live Polymarket hedge execution is still deferred; current support is dry-run
+  or external proxy mode only
 - local backend test stack is runnable with one command
 
 ## Key Backend Paths
@@ -129,6 +133,7 @@ Engine service/unit:
 - liquidation lifecycle
 - exposure aggregation
 - hedge execution decisioning and persistence
+- hedge proxy client normalization and dry-run execution mode
 - settlement lifecycle
 - vault sync logic
 
@@ -150,18 +155,25 @@ Still missing from backend automation:
 - live chain settlement smoke test in the automated path
 - live Polymarket integration in the automated path
 
-## Recommended Next Backend Task
+Important hedge status:
 
-Phase `7.2`: hedge executor.
+- the engine can now decide when to hedge and persist `HedgeOrder` state
+- the repo does not yet contain direct live Polymarket order signing/submission
+- current live execution depends on an external hedge proxy; otherwise the
+  system should stay in dry-run mode
+
+## Deferred Backend Follow-Up
+
+Deferred item: direct live hedge execution for Phase `7.2`.
 
 Suggested scope:
 
-- add a real Polymarket execution adapter behind the current service boundary
-- wire retries and orchestration for `HedgeOrder` lifecycle transitions
+- wire a real Polymarket order-signing/submission path behind the current hedge proxy boundary
+- add retries and orchestration for `HedgeOrder` lifecycle transitions
 - expose internal hedge state for debugging after worker plumbing lands
 
 Recommended artifacts:
 
 - `src/services/polymarket-hedge-client.ts`
-- worker wiring around `src/services/hedge-execution-service.ts`
+- `src/workers/hedge-worker.ts`
 - focused tests around adapter and retry behavior

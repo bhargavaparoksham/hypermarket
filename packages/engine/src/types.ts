@@ -9,8 +9,15 @@ export interface EngineConfig {
   redisUrl: string;
   polymarketApiUrl: string;
   polymarketWsUrl: string;
+  polymarketHedgeProxyUrl: string | null;
+  polymarketHedgeApiKey: string | null;
+  polymarketHedgeDryRun: boolean;
   polymarketMarketAllowlist: string[];
   marketDiscoveryCacheTtlMs: number;
+  hedgeExecutionIntervalMs: number;
+  hedgeMinNetNotional: number;
+  hedgeMinImbalanceRatio: number;
+  hedgeMaxOrderNotional: number | null;
   polygonRpcUrl: string;
   vaultManagerPrivateKey: string;
   hyperVaultAddress: string;
