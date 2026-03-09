@@ -32,22 +32,22 @@ Notes:
 
 This is the next task to pick up. If you are resuming work, start here unless priorities have changed.
 
-- Phase `7.1`: add exposure aggregation
-- First implementation target: `packages/engine/src/services/exposure-service.ts`
-- First test target: `packages/engine/test/exposure.test.mjs`
+- Phase `7.2`: implement hedge executor
+- First implementation target: `packages/engine/src/services/hedge-execution-service.ts`
+- First test target: `packages/engine/test/hedge-execution.test.mjs`
 
 Scope for this task:
 
-- aggregate protocol exposure by market and side
-- compute net long / net short / net notional per market
-- define the hedge-threshold inputs that Phase `7.2` will consume
-- expose internal risk metrics in a service-friendly shape before adding API/debug wiring
+- consume Phase `7.1` exposure snapshots to decide when hedges should be placed
+- add a Polymarket execution adapter or stubbed executor boundary
+- persist hedge attempts and status transitions in `HedgeOrder`
+- keep the first change set service-layer focused before adding worker orchestration or external APIs
 
 Why this is next:
 
-- Phase `6` settlement and vault-sync work is done
-- Phase `7.1` is the next incomplete dependency for hedging
-- this keeps the next change set service-layer focused before adding external execution logic
+- Phase `7.1` exposure aggregation is now available as a service-layer dependency
+- the next missing backend dependency is acting on threshold breaches
+- this keeps the next change set focused on execution decisions before worker wiring
 
 ## Phase 0: Repo Foundation
 
@@ -325,13 +325,15 @@ Exit criteria:
 
 ### 7.1 Add exposure aggregation
 
-- [ ] Aggregate user exposure by market and side
-- [ ] Define per-market hedge thresholds
-- [ ] Expose internal risk metrics for debugging
+- [x] Aggregate user exposure by market and side
+- [x] Define per-market hedge thresholds
+- [x] Expose internal risk metrics for debugging
 
 Exit criteria:
 
 - engine can tell when internal virtual exposure is too large
+- verified with a focused service test suite covering active-status filtering,
+  per-market long/short aggregation, and market subset filtering
 
 ### 7.2 Implement hedge executor
 

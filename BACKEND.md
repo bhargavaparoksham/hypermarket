@@ -18,6 +18,10 @@ Completed through Phase `6.2`:
 - vault balance mirroring into engine account state
 - settlement submission and reconciliation via `viem`
 
+Now also completed:
+
+- Phase `7.1` exposure aggregation
+
 Current backend status:
 
 - contract settlement layer exists in `HyperVault`
@@ -122,6 +126,7 @@ Engine service/unit:
 - formulas
 - account / position domain logic
 - liquidation lifecycle
+- exposure aggregation
 - settlement lifecycle
 - vault sync logic
 
@@ -145,16 +150,16 @@ Still missing from backend automation:
 
 ## Recommended Next Backend Task
 
-Phase `7.1`: exposure aggregation.
+Phase `7.2`: hedge executor.
 
 Suggested scope:
 
-- aggregate protocol exposure by market and side
-- define hedge-threshold calculation inputs
-- expose internal risk metrics for debugging
+- consume exposure snapshots to identify threshold breaches
+- create service-layer hedge execution decisions and persistence
+- define the execution adapter boundary before worker/API wiring
 
 Recommended artifacts:
 
-- `src/services/exposure-service.ts`
-- focused service tests
-- optional internal API/debug surface after service logic is stable
+- `src/services/hedge-execution-service.ts`
+- focused service tests around threshold breach handling
+- optional worker wiring after the service boundary is stable

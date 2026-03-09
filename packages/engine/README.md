@@ -13,6 +13,7 @@ Current scope:
 - allowlisted Polymarket price ingestion into Redis via the worker
 - market price reads via `GET /markets/:marketId/prices`
 - account and position domain services for open/increase/reduce/close flows
+- exposure aggregation by market and side for hedging inputs
 - vault-balance sync service that mirrors on-chain settled collateral into margin accounts
 - settlement lifecycle service with on-chain submission/reconciliation via `viem`
 
@@ -104,6 +105,24 @@ The engine now includes a liquidation service in
 
 The reference `10x` long at `0.50` now produces a liquidation price of
 approximately `0.455`, and that case is covered in tests.
+
+## Exposure Aggregation
+
+The engine now includes a service-layer exposure snapshot in
+`src/services/exposure-service.ts` for Phase `7.1`.
+
+Current behavior:
+
+- aggregates active positions with statuses `OPEN`, `CLOSING`, and
+  `LIQUIDATING`
+- summarizes long and short exposure per market
+- computes `grossNotional`, signed `netNotional`, `netLongNotional`, and
+  `netShortNotional`
+- returns hedge-threshold inputs including `absoluteNetNotional` and
+  `imbalanceRatio` for the next hedging phase
+
+This is currently service-layer only and is covered by a focused exposure test
+suite.
 
 ## Vault Balance Sync
 
