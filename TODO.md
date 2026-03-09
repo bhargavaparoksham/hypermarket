@@ -32,28 +32,29 @@ Notes:
 
 This is the next task to pick up. If you are resuming work, start here unless priorities have changed.
 
-- Phase `8.2`: build core trading terminal
-- Next implementation target: `packages/web/app/page.tsx`
-- Next test target: `packages/web` still has no dedicated automated test suite
+- Phase `9.1`: expose engine account and trade endpoints
+- Next implementation target: `packages/engine/src/http.ts`
+- Next test target: account/positions API coverage plus first `packages/web` UI tests
 
 Scope for this task:
 
-- add a live markets sidebar backed by engine market reads
-- add the market detail panel and account summary layout
-- add the order ticket and leverage control shell
-- keep this pass UI-focused before wiring full trade submission
+- add `GET /accounts/:address`
+- add `GET /positions/:address`
+- add `GET /markets/:marketId`
+- define the first `POST /trade` request and response contract
+- wire the web terminal shells to those account and positions reads
 
 Current note:
 
-- web bootstrap is now in place in `packages/web`
+- Phase `8.2` core terminal UI is now in place in `packages/web`
 - live hedging is intentionally deferred for the first end-to-end MVP pass
 - current repo support is dry-run mode or an external hedge proxy only
 
 Why this is next:
 
-- Phase `8.1` web bootstrap is now in place
-- the next highest-value MVP dependency is the actual trading surface
-- this unlocks end-to-end product flow faster than live hedging does
+- the web terminal now has real market reads but account and trade actions still have no API surface
+- these endpoints unlock the next meaningful end-to-end integration step
+- this is a better use of time than direct in-repo live hedge execution for the first MVP pass
 
 ## Phase 0: Repo Foundation
 
@@ -381,16 +382,17 @@ Exit criteria:
 
 ### 8.2 Build core trading terminal
 
-- [ ] Add `Live Markets` sidebar
-- [ ] Add market detail panel
-- [ ] Add leverage slider from `1x` to `5x`
-- [ ] Add order ticket for long and short
-- [ ] Add account summary card
-- [ ] Add positions table with size, entry, mark, liq, and PnL
+- [x] Add `Live Markets` sidebar
+- [x] Add market detail panel
+- [x] Add leverage slider shell
+- [x] Add order ticket shell for long and short
+- [x] Add account summary card shell
+- [x] Add positions table shell
 
 Exit criteria:
 
-- a user can view markets, inspect risk, and submit virtual trades from the UI
+- a user can view markets and inspect the terminal layout from the UI
+- trade submission remains deferred until account and trade endpoints land
 
 ### 8.3 Add deposit and withdraw flows
 

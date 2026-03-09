@@ -8,7 +8,9 @@ Current scope:
 - Tailwind CSS setup
 - app-level wallet and React Query providers
 - environment loader for engine URL, chain ID, and vault address
-- initial landing shell for the upcoming trading terminal
+- core trading terminal layout
+- live engine-backed market watchlist and market detail reads
+- read-only account summary, positions, and order ticket shells
 
 Current runtime envs:
 
@@ -19,7 +21,8 @@ Current runtime envs:
 
 Current caveats:
 
-- the trading terminal itself is not built yet
 - deposit and withdraw flows are not wired yet
+- account and positions engine endpoints are not exposed yet
+- order submission is not wired yet
 - live wallet UX is injected-wallet only for now
 - there is still no dedicated automated web test suite

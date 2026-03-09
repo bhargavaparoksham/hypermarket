@@ -16,6 +16,9 @@ function writeJson(
 ): void {
   response.statusCode = statusCode;
   response.setHeader("content-type", "application/json");
+  response.setHeader("access-control-allow-origin", "*");
+  response.setHeader("access-control-allow-methods", "GET, OPTIONS");
+  response.setHeader("access-control-allow-headers", "content-type");
   response.end(JSON.stringify(payload));
 }
 
@@ -28,6 +31,15 @@ async function handleRequest(
 ): Promise<void> {
   const requestUrl = new URL(request.url || "/", `http://${config.host}:${config.port}`);
   const pathname = requestUrl.pathname;
+
+  if (request.method === "OPTIONS") {
+    response.statusCode = 204;
+    response.setHeader("access-control-allow-origin", "*");
+    response.setHeader("access-control-allow-methods", "GET, OPTIONS");
+    response.setHeader("access-control-allow-headers", "content-type");
+    response.end();
+    return;
+  }
 
   if (request.method === "GET" && pathname === "/healthz") {
     writeJson(response, 200, {
