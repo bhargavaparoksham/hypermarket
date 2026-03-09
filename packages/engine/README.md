@@ -14,6 +14,7 @@ Current scope:
 - market price reads via `GET /markets/:marketId/prices`
 - account and position domain services for open/increase/reduce/close flows
 - exposure aggregation by market and side for hedging inputs
+- hedge execution decisioning with persisted `HedgeOrder` transitions
 - vault-balance sync service that mirrors on-chain settled collateral into margin accounts
 - settlement lifecycle service with on-chain submission/reconciliation via `viem`
 
@@ -123,6 +124,23 @@ Current behavior:
 
 This is currently service-layer only and is covered by a focused exposure test
 suite.
+
+## Hedge Execution Foundation
+
+The engine now includes a service-layer hedge executor in
+`src/services/hedge-execution-service.ts` for the first Phase `7.2` slice.
+
+Current behavior:
+
+- consumes exposure snapshots and applies configurable net-notional and
+  imbalance thresholds
+- creates protocol-level `HedgeOrder` records when a market breaches policy
+- calls an injected execution adapter boundary and persists resulting
+  `SUBMITTED`, `FILLED`, `PARTIALLY_FILLED`, or `FAILED` state
+- skips duplicate markets that already have open hedge orders
+
+This is still adapter-driven rather than a live Polymarket execution path, and
+it is covered by a focused hedge execution test suite.
 
 ## Vault Balance Sync
 

@@ -33,21 +33,21 @@ Notes:
 This is the next task to pick up. If you are resuming work, start here unless priorities have changed.
 
 - Phase `7.2`: implement hedge executor
-- First implementation target: `packages/engine/src/services/hedge-execution-service.ts`
-- First test target: `packages/engine/test/hedge-execution.test.mjs`
+- Next implementation target: `packages/engine/src/services/polymarket-hedge-client.ts`
+- Next test target: `packages/engine/test/hedge-execution.test.mjs`
 
 Scope for this task:
 
-- consume Phase `7.1` exposure snapshots to decide when hedges should be placed
-- add a Polymarket execution adapter or stubbed executor boundary
-- persist hedge attempts and status transitions in `HedgeOrder`
-- keep the first change set service-layer focused before adding worker orchestration or external APIs
+- keep the new service-layer hedge executor and threshold policy as the decision boundary
+- add a real Polymarket execution adapter behind that boundary
+- wire worker orchestration and retries around `HedgeOrder` lifecycle transitions
+- add internal debug visibility once execution plumbing is stable
 
 Why this is next:
 
-- Phase `7.1` exposure aggregation is now available as a service-layer dependency
-- the next missing backend dependency is acting on threshold breaches
-- this keeps the next change set focused on execution decisions before worker wiring
+- Phase `7.1` exposure aggregation is now available as a dependency
+- Phase `7.2` now has a service-layer executor boundary and focused tests
+- the next missing backend dependency is live execution plumbing plus orchestration
 
 ## Phase 0: Repo Foundation
 
@@ -337,14 +337,17 @@ Exit criteria:
 
 ### 7.2 Implement hedge executor
 
-- [ ] Add Polymarket order execution client or stub adapter
-- [ ] Place hedge orders when thresholds are breached
-- [ ] Persist hedge attempts and results
-- [ ] Add failure handling and manual recovery notes
+- [x] Add Polymarket order execution client or stub adapter
+- [x] Place hedge orders when thresholds are breached
+- [x] Persist hedge attempts and results
+- [~] Add failure handling and manual recovery notes
 
 Exit criteria:
 
-- MVP can reduce aggregate protocol exposure for supported markets
+- service-layer hedge execution is covered for threshold breach, dedupe, and
+  adapter failure handling
+- remaining work is real execution plumbing before MVP can reduce aggregate
+  protocol exposure on supported markets
 
 ## Phase 8: Web App
 

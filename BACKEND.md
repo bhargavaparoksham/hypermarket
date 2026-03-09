@@ -21,6 +21,7 @@ Completed through Phase `6.2`:
 Now also completed:
 
 - Phase `7.1` exposure aggregation
+- Phase `7.2` service-layer hedge executor foundation
 
 Current backend status:
 
@@ -127,6 +128,7 @@ Engine service/unit:
 - account / position domain logic
 - liquidation lifecycle
 - exposure aggregation
+- hedge execution decisioning and persistence
 - settlement lifecycle
 - vault sync logic
 
@@ -154,12 +156,12 @@ Phase `7.2`: hedge executor.
 
 Suggested scope:
 
-- consume exposure snapshots to identify threshold breaches
-- create service-layer hedge execution decisions and persistence
-- define the execution adapter boundary before worker/API wiring
+- add a real Polymarket execution adapter behind the current service boundary
+- wire retries and orchestration for `HedgeOrder` lifecycle transitions
+- expose internal hedge state for debugging after worker plumbing lands
 
 Recommended artifacts:
 
-- `src/services/hedge-execution-service.ts`
-- focused service tests around threshold breach handling
-- optional worker wiring after the service boundary is stable
+- `src/services/polymarket-hedge-client.ts`
+- worker wiring around `src/services/hedge-execution-service.ts`
+- focused tests around adapter and retry behavior
